@@ -3,7 +3,7 @@ import sqlite3
 
 class Utility:
 
-    def printList(self):
+    def printlist(self):
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
 
@@ -23,9 +23,9 @@ class Pelamar(Utility):
     def __init__(self):
         pass
 
-    def printList(self):
+    def printlist(self):
 
-        data_lowongan = super().printList()
+        data_lowongan = super().printlist()
         print()
 
         for lowongan in data_lowongan:
@@ -33,7 +33,7 @@ class Pelamar(Utility):
 
                 print("{} \t\t".format(i + 1), end="")
 
-                if i > 0 and i < 5:
+                if i < 5:
                     print(lowongan[i], "\t\t", end="")
 
             print()
@@ -50,9 +50,11 @@ class Admin(Utility):
     def __init__(self):
         pass
 
-    def printList(self):
+    # lowongan kerja panel
 
-        data_lowongan = super().printList()
+    def printlist(self):
+
+        data_lowongan = super().printlist()
 
         print(" \t Nilai Kelulusan Pertanyaan Kerja \t Pertanyaan 1 \t Pertanyaan 2 \t Pertanyaan 3", end="")
         print(" \t Pertanyaan 4 \t Pertanyaan 5")
@@ -60,14 +62,15 @@ class Admin(Utility):
         for lowongan in data_lowongan:
             for i in range(0, len(lowongan)):
 
-                if i > 0 and i < 5:
+                if i < 5:
                     print(lowongan[i], "\t\t", end="")
                 else:
                     print(lowongan[i], "\t", end="")
 
             print()
 
-    def __check_priority_question(self, pertanyaan):
+    @staticmethod
+    def __check_priority_question(pertanyaan):
         check_priority_pertanyaan = input(
             'Apakah pertanyaan "' + pertanyaan + '" merupakan pertanyaan prioritas (1. Ya | 2. Tidak): ')
 
@@ -121,12 +124,12 @@ class Admin(Utility):
 
         print("note : jika tidak ingin diubah maka tulis 'pass'")
 
-        list_modify = []
+        list_modify = list()
 
         list_modify.append(input("Nama pekerjaan : "))
         list_modify.append(input("Deskripsi pekerjaan : "))
         list_modify.append(input("Status pekerjaan : "))
-        list_modify.append("pass")
+        list_modify.append(input("Kategori pekerjaan : "))
         list_modify.append(input("Nilai Lulus : "))
 
         for j in range(0, 5):
@@ -145,9 +148,9 @@ class Admin(Utility):
                         kategori_pekerjaan = ?, nilai_lulus = ?, pertanyaan1 = ?,
                         pertanyaan2 = ?, pertanyaan3 = ?, pertanyaan4 = ?, pertanyaan5 = ?
                         WHERE rowid = ?
-            """, (str(list_modify[0]), str(list_modify[1]), str(list_modify[2]), str(list_modify[3])
-                                    , str(list_modify[4]), str(list_modify[5]), str(list_modify[6]), str(list_modify[7])
-                                    , str(list_modify[8]), str(list_modify[9]), str(id_pekerjaan)))
+            """, (str(list_modify[0]), str(list_modify[1]), str(list_modify[2]), str(list_modify[3]),
+                  str(list_modify[4]), str(list_modify[5]), str(list_modify[6]), str(list_modify[7]),
+                  str(list_modify[8]), str(list_modify[9]), str(id_pekerjaan)))
 
         conn.commit()
 
@@ -155,7 +158,8 @@ class Admin(Utility):
 
         conn.close()
 
-    def __delete_lowongan_pekerjaan(self):
+    @staticmethod
+    def __delete_lowongan_pekerjaan():
         id_pekerjaan = input("Masukkan id lowongan pekerjaan yang ingin dihapus : ")
 
         conn = sqlite3.connect("jobs.db")
@@ -168,7 +172,21 @@ class Admin(Utility):
 
         conn.close()
 
-    def __list_test_psikologi(self):
+    # test psikologi panel
+
+    @staticmethod
+    def __count_soal_psikologi():
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
+
+        c.execute("SELECT rowid, * FROM test_psikologi")
+        conn.commit()
+
+        list_soal = c.fetchall()
+        return len(list_soal)
+
+    @staticmethod
+    def __list_test_psikologi():
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
 
@@ -182,26 +200,38 @@ class Admin(Utility):
 
         conn.close()
 
-    def __tambah_test_psikologi(self):
-        n = int(input("Jumlah pertanyaan psikologi yang akan ditambahkan : "))
+    @staticmethod
+    def __tambah_test_psikologi(jumlah_soal):
 
-        for i in range(0, n):
-            soal = input("Masukkan pertanyaan psikologi : ")
+        if jumlah_soal < 5:
 
-            tuple_soal = [soal]
-            tuple_soal = tuple(tuple_soal)
+            n = int(input("Jumlah pertanyaan psikologi yang akan ditambahkan : "))
 
-            conn = sqlite3.connect("jobs.db")
-            c = conn.cursor()
+            if jumlah_soal + n <= 5:
 
-            c.execute("INSERT INTO test_psikologi VALUES (?)", tuple_soal)
-            conn.commit()
+                for i in range(0, n):
+                    soal = input("Masukkan pertanyaan psikologi : ")
 
-            conn.close()
+                    tuple_soal = [soal]
+                    tuple_soal = tuple(tuple_soal)
 
-            print("Berhasil memasukkan data")
+                    conn = sqlite3.connect("jobs.db")
+                    c = conn.cursor()
 
-    def __modify_test_psikologi(self):
+                    c.execute("INSERT INTO test_psikologi VALUES (?)", tuple_soal)
+                    conn.commit()
+
+                    conn.close()
+
+                    print("Berhasil memasukkan data")
+            else:
+                print("Tidak bisa menambahkan {} pertanyaan karena melampaui limit jumlah pertanyaan".format(n))
+
+        else:
+            print("Anda sudah mengisi 5 Pertanyaan Test Psikologi")
+
+    @staticmethod
+    def __modify_test_psikologi():
         id_soal = input("Masukkan ID soal psikologi yang ingin diedit : ")
         soal_modify = input("Masukkan pertanyaan baru : ")
 
@@ -215,7 +245,8 @@ class Admin(Utility):
 
         print("Berhasil mengubah soal")
 
-    def __hapus_test_psikologi(self):
+    @staticmethod
+    def __hapus_test_psikologi():
         id_soal = input("Masukkan ID soal psikologi yang ingin dihapus : ")
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
@@ -223,9 +254,18 @@ class Admin(Utility):
         c.execute("DELETE FROM test_psikologi WHERE rowid = ? ", str(id_soal))
         conn.commit()
 
+        print("Berhasil menghapus soal")
+
         conn.close()
 
     def __menu_psikologi(self):
+
+        jumlah_soal = self.__count_soal_psikologi()
+
+        if jumlah_soal != 5:
+            print("Peringatan : Hanya ada {} dari 5 Pertanyaan Test Psikologi! "
+                  "Harap tambahkan {} Pertanyaan !".format(jumlah_soal, 5-jumlah_soal))
+
         print("1. List Test Psikologi")
         print("2. Input Test Psikologi")
         print("3. Modifikasi Test Psikologi")
@@ -236,7 +276,7 @@ class Admin(Utility):
         if pilihan_menu == "1":
             self.__list_test_psikologi()
         elif pilihan_menu == "2":
-            self.__tambah_test_psikologi()
+            self.__tambah_test_psikologi(jumlah_soal)
         elif pilihan_menu == "3":
             self.__modify_test_psikologi()
         elif pilihan_menu == "4":
@@ -252,14 +292,14 @@ class Admin(Utility):
         pilihan_menu = input("Pilih menu : ")
 
         if pilihan_menu == "1":
-            self.printList()
+            self.printlist()
         elif pilihan_menu == "2":
             self.__tambah_lowongan_pekerjaan()
         elif pilihan_menu == "3":
-            self.printList()
+            self.printlist()
             self.__modify_lowongan_pekerjaan()
         elif pilihan_menu == "4":
-            self.printList()
+            self.printlist()
             self.__delete_lowongan_pekerjaan()
         elif pilihan_menu == "5":
             print("still working")
@@ -287,7 +327,6 @@ class Admin(Utility):
 
 
 # menu utama
-
 
 print("Program Seleksi Pelamar Kerja")
 print("1. Daftar Kerja\t\t2.Admin\t\t3.Keluar Program")
@@ -318,3 +357,6 @@ while pil_menu != "3":
         print("Terima kasih sampai jumpa kembali")
     else:
         print("Pilihan anda salah silahkan ulangi lagi")
+
+
+
