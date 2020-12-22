@@ -1,6 +1,14 @@
 import sqlite3
 import datetime
 
+# email purpose
+import smtplib
+# libraries for email texting
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
 
 class Utility:
 
@@ -249,6 +257,64 @@ class Evaluate(Utility):
 
         conn.close()
 
+    def send_ke_email_pelamar(self):
+        data = self.retrievedata()
+
+        # header : from, to, subject
+
+        from_email = "ianindratama2@gmail.com"
+        to_email = data[0][4]
+        subject = "Pemberitahuan Hasil Lamaran Kerja di PT XYZ"
+
+        msg = MIMEMultipart()
+        # header
+        msg['From'] = from_email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+
+        # body
+        body = "<h1>Halo <b>" + str(data[0][3]) + "</b>,</h1>"
+
+        if data[0][2] == "Tidak Lulus":
+            body += "<br>Mohon maaf anda belum lolos tahap 1 lamaran kerja perusahan PT XYZ sebagai " + str(data[1][1])
+        elif data[0][2] == "Lulus":
+            body += "<br>Selamat anda lolos tahap 1 lamaran kerja perusahan PT XYZ sebagai " + str(data[1][1])
+
+            # konversi dari tanggal di database ke string
+            date_str = data[0][9]
+            date_obj = datetime.datetime.strptime(date_str, "%d/%m/%Y")
+
+            # pertemuan tahap ke dua akan dilangsungkan 3 hari setelah pelamar melakukan tahap satu
+            date = date_obj.date()
+            date += datetime.timedelta(days=3)
+
+            # mengecek apakah hari nya itu sabtu atau minggu kalau iya pindahin ke minggu
+            day = date.strftime("%A")
+
+            if day == "Saturday":
+                day = "Monday"
+                date += datetime.timedelta(days=2)
+            elif day == "Sunday":
+                day = "Monday"
+                date += datetime.timedelta(days=1)
+
+            body += ".<br>Silahkan Datang ke kantor pada hari " + day + " jam 9 WIB pada tanggal " + str(date)
+
+        body += ".<br><br>Dari HRD PT XYZ<br><b>Joko Syamsudin</b>"
+
+        # explaining to NIME what is the type of the message (plain, html, xml, etc)
+        msg.attach(MIMEText(body, 'html'))
+
+        # send the message to pelamar email
+        message = msg.as_string()
+
+        server = smtplib.SMTP("smtp.gmail.com", 587)  # server host, port
+        server.starttls()  # secure server
+        server.login(from_email, "ywisfhwwmacvshbi")
+
+        server.sendmail(from_email, to_email, message)
+
+        server.quit()
 
 class Admin(Utility):
 
@@ -584,6 +650,7 @@ while pil_menu != "3":
         pelamar = Pelamar(menu_pelamar.get_all_soal())
         proses = Evaluate(pelamar.send_to_database())
         proses.analisa_kelulusan(proses.retrievedata())
+        proses.send_ke_email_pelamar()
         print("Sukses melamar, silahkan buka email anda untuk pemberitahuan selanjutnya")
     elif pil_menu == "2":
 
