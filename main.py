@@ -44,6 +44,10 @@ class MenuPelamar(Utility):
 
             print()
 
+    def __get_id_pekerjaan(self, no):
+        data = super(MenuPelamar, self).retrievedata("pekerjaan")
+        return data[no][0]
+
     def __get_nama_pekerjaan(self, no):
         data = super(MenuPelamar, self).retrievedata("pekerjaan")
         return data[no][1]
@@ -80,13 +84,17 @@ class MenuPelamar(Utility):
 
         no_pekerjaan = user_input-1
 
-        return [self.__get_nama_pekerjaan(no_pekerjaan), self.__get_soal_kerja(no_pekerjaan),
-                self.__get_soal_psikologi()]
+        return [self.__get_id_pekerjaan(no_pekerjaan), self.__get_nama_pekerjaan(no_pekerjaan),
+                self.__get_soal_kerja(no_pekerjaan), self.__get_soal_psikologi()]
 
 
 class Pelamar(MenuPelamar):
 
-    def __init__(self, soal):
+    def __init__(self, data):
+
+        self.__id_pekerjaan = data[0]
+        self.__status_kelulusan = "-"
+
         print("Isi Data Diri")
         self.__nama_lengkap = input("Nama Lengkap : ")
         self.__email = input("Email : ")
@@ -98,12 +106,12 @@ class Pelamar(MenuPelamar):
         x = datetime.datetime.now()
         self.__tanggal_applied = x.strftime("%d/%m/%Y")
 
-        print("Pertanyaan mengenai Lowongan Pekerjaan " + soal[0])
+        print("Pertanyaan mengenai Lowongan Pekerjaan " + data[1])
         print("5 : Sangat Bisa | 4 : Cukup Bisa | 3 : Bisa | 2 : Kurang Bisa | 1 : Tidak Bisa")
 
         self.__tuple_jawaban_kerja = list()
 
-        for s in soal[1]:
+        for s in data[2]:
             self.__tuple_jawaban_kerja.append(input("" + s + " : "))
 
         self.__tuple_jawaban_kerja = tuple(self.__tuple_jawaban_kerja)
@@ -113,14 +121,15 @@ class Pelamar(MenuPelamar):
 
         self.__tuple_jawaban_psikologi = list()
 
-        for s in soal[2]:
+        for s in data[3]:
             self.__tuple_jawaban_psikologi.append(input("" + s + " : "))
 
         self.__tuple_jawaban_psikologi = tuple(self.__tuple_jawaban_psikologi)
 
         self.__tuple_jawaban_gabungan = self.__tuple_jawaban_kerja + self.__tuple_jawaban_psikologi
 
-        self.__tupleData_send_to_database = (self.__nama_lengkap, self.__email, self.__no_hp, self.__jenis_kelamin,
+        self.__tupleData_send_to_database = (self.__id_pekerjaan, self.__status_kelulusan, self.__nama_lengkap,
+                                             self.__email, self.__no_hp, self.__jenis_kelamin,
                                              self.__pendidikan_terakhir, self.__lama_pengalaman_kerja,
                                              self.__tanggal_applied)
 
@@ -130,11 +139,100 @@ class Pelamar(MenuPelamar):
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
 
-        c.execute("INSERT INTO pelamar VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        c.execute("INSERT INTO pelamar VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                   self.__tupleData_send_to_database)
         conn.commit()
 
-        print("Sukses melamar, silahkan menunggu pemberitahuan selanjutnya")
+        c.execute("SELECT last_insert_rowid()")
+
+        id_pelamar = c.lastrowid
+
+        conn.close()
+
+        return id_pelamar
+
+
+class Evaluate(Utility):
+
+    def __init__(self, id_pelamar):
+        self.__id_pelamar = id_pelamar
+
+    def retrievedata(self):
+
+        # retrive data pelamar
+        data = super(Evaluate, self).retrievedata("pelamar")
+
+        data_pelamar = list()
+
+        for d in data:
+            if self.__id_pelamar == d[0]:
+                data_pelamar = d
+
+        # retrieve data pekerjaan
+        data = super(Evaluate, self).retrievedata("pekerjaan")
+
+        data_pekerjaan = list()
+
+        for d in data:
+            if data_pelamar[1] == str(d[0]):
+                data_pekerjaan = d
+
+        # retrieve data soal kerja
+        data_soal_kerja = list()
+
+        for i in range(0, len(data_pekerjaan)):
+            if i > 5:
+                data_soal_kerja.append(data_pekerjaan[i])
+
+        # retrieve data jawaban kerja
+        data_jawaban_kerja = list()
+        data_jawaban_psikologi = list()
+
+        for i in range(0, len(data_pelamar)):
+            if 9 < i < 15:
+                data_jawaban_kerja.append(data_pelamar[i])
+            elif i >= 15:
+                data_jawaban_psikologi.append(data_pelamar[i])
+
+        data_jawaban_gabungan = [data_jawaban_kerja, data_jawaban_psikologi]
+
+        return [data_pelamar, data_pekerjaan, data_soal_kerja, data_jawaban_gabungan]
+
+    def analisa_kelulusan(self, data):
+
+        # analisa jawaban kerja
+
+        nilai_kerja = 0
+
+        for i in range(0, len(data[2])):
+            if data[2][i][0] == "P":
+                if int(data[3][0][i]) > 4:
+                    nilai_kerja += int(data[3][0][i])
+                else:
+                    nilai_kerja = 0
+                    break
+            else:
+                nilai_kerja += int(data[3][0][i])
+
+        # analisa jawaban psikologi
+
+        nilai_psikologi = 0
+
+        for j in data[3][1]:
+            nilai_psikologi += int(j)
+
+        # analisa kelulusan dan modify status kelulusan di database
+
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
+
+        if nilai_kerja > int(data[1][5]) and nilai_psikologi > 20:
+            c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Lulus", data[0][0]))
+            conn.commit()
+        else:
+            c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Tidak Lulus", data[0][0]))
+            conn.commit()
+
         conn.close()
 
 
@@ -259,6 +357,9 @@ class Admin(Utility):
         c = conn.cursor()
 
         c.execute("DELETE FROM pekerjaan WHERE rowid = ? ", id_pekerjaan)
+        conn.commit()
+
+        c.execute("DELETE FROM pelamar WHERE id_pekerjaan = ? ", id_pekerjaan)
         conn.commit()
 
         print("Berhasil dihapus")
@@ -434,7 +535,9 @@ while pil_menu != "3":
         menu_pelamar = MenuPelamar()
         menu_pelamar.menu_utama()
         pelamar = Pelamar(menu_pelamar.get_all_soal())
-        pelamar.send_to_database()
+        proses = Evaluate(pelamar.send_to_database())
+        proses.analisa_kelulusan(proses.retrievedata())
+        print("Sukses melamar, silahkan buka email anda untuk pemberitahuan selanjutnya")
     elif pil_menu == "2":
 
         admin = Admin()
@@ -452,5 +555,3 @@ while pil_menu != "3":
         print("Terima kasih sampai jumpa kembali")
     else:
         print("Pilihan anda salah silahkan ulangi lagi")
-
-
