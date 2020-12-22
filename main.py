@@ -196,7 +196,20 @@ class Evaluate(Utility):
 
         data_jawaban_gabungan = [data_jawaban_kerja, data_jawaban_psikologi]
 
-        return [data_pelamar, data_pekerjaan, data_soal_kerja, data_jawaban_gabungan]
+        # retrieve data nilai minimum kelulusan untuk setiap test_psikologi
+        data = super(Evaluate, self).retrievedata("test_psikologi")
+        data_nilai_minimum_kelulusan_psikologi = list()
+        data_nilai_maximum_kelulusan_psikologi = list()
+
+        for d in data:
+            data_nilai_minimum_kelulusan_psikologi.append(int(d[2]))
+            data_nilai_maximum_kelulusan_psikologi.append(int(d[3]))
+
+        data_nilai_kelulusan_psikologi = [data_nilai_minimum_kelulusan_psikologi,
+                                          data_nilai_maximum_kelulusan_psikologi]
+
+        return [data_pelamar, data_pekerjaan, data_soal_kerja,
+                data_jawaban_gabungan, data_nilai_kelulusan_psikologi]
 
     def analisa_kelulusan(self, data):
 
@@ -206,7 +219,7 @@ class Evaluate(Utility):
 
         for i in range(0, len(data[2])):
             if data[2][i][0] == "P":
-                if int(data[3][0][i]) > 4:
+                if int(data[3][0][i]) >= 4:
                     nilai_kerja += int(data[3][0][i])
                 else:
                     nilai_kerja = 0
@@ -216,17 +229,18 @@ class Evaluate(Utility):
 
         # analisa jawaban psikologi
 
-        nilai_psikologi = 0
+        counter_kelulusan_psikologi = 0
 
-        for j in data[3][1]:
-            nilai_psikologi += int(j)
+        for j in range(0, len(data[3][1])):
+            if int(data[4][0][j]) <= int(data[3][1][j]) <= int(data[4][1][j]):
+                counter_kelulusan_psikologi += 1
 
         # analisa kelulusan dan modify status kelulusan di database
 
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
 
-        if nilai_kerja > int(data[1][5]) and nilai_psikologi > 20:
+        if nilai_kerja >= int(data[1][5]) and counter_kelulusan_psikologi >= 3:
             c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Lulus", data[0][0]))
             conn.commit()
         else:
@@ -366,6 +380,11 @@ class Admin(Utility):
 
         conn.close()
 
+    def __list_pelamar_kerja(self):
+        data = super(Admin, self).retrievedata("pelamar")
+        for d in data:
+            print(d)
+
     # test psikologi panel
 
     @staticmethod
@@ -405,14 +424,17 @@ class Admin(Utility):
 
                 for i in range(0, n):
                     soal = input("Masukkan pertanyaan psikologi : ")
-
-                    tuple_soal = [soal]
+                    nilai_minimum_kelulusan = input("""Masukkan Nilai Minimum Kelulusan untuk pertanyaan "{}" : """.
+                                                    format(soal))
+                    nilai_maximum_kelulusan = input("""Masukkan Nilai Maximum Kelulusan untuk pertanyaan "{}" : """.
+                                                    format(soal))
+                    tuple_soal = [soal, nilai_minimum_kelulusan, nilai_maximum_kelulusan]
                     tuple_soal = tuple(tuple_soal)
 
                     conn = sqlite3.connect("jobs.db")
                     c = conn.cursor()
 
-                    c.execute("INSERT INTO test_psikologi VALUES (?)", tuple_soal)
+                    c.execute("INSERT INTO test_psikologi VALUES (?, ?, ?)", tuple_soal)
                     conn.commit()
 
                     conn.close()
@@ -424,15 +446,40 @@ class Admin(Utility):
         else:
             print("Anda sudah mengisi 5 Pertanyaan Test Psikologi")
 
-    @staticmethod
-    def __modify_test_psikologi():
-        id_soal = input("Masukkan ID soal psikologi yang ingin diedit : ")
+    def __modify_test_psikologi(self):
+
+        data = super(Admin, self).retrievedata("test_psikologi")
+
+        id_soal = int(input("Masukkan ID soal psikologi yang ingin diedit : "))
+
+        for d in data:
+            if d[0] == id_soal:
+                data = d
+
+        print('Isi dengan "pass" jika tidak ingin mengubah data')
         soal_modify = input("Masukkan pertanyaan baru : ")
+
+        if soal_modify == "pass":
+            soal_modify = data[1]
+
+        nilai_minimum_kelulusan_modify = input("""Masukkan Nilai Minimum Kelulusan untuk pertanyaan "{}" : """.
+                                               format(soal_modify))
+
+        if nilai_minimum_kelulusan_modify == "pass":
+            nilai_minimum_kelulusan_modify = data[2]
+
+        nilai_maximum_kelulusan_modify = input("""Masukkan Nilai Maximum Kelulusan untuk pertanyaan "{}" : """.
+                                               format(soal_modify))
+
+        if nilai_maximum_kelulusan_modify == "pass":
+            nilai_maximum_kelulusan_modify = data[2]
 
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
 
-        c.execute("UPDATE test_psikologi SET soal = ? WHERE rowid = ?", (soal_modify, id_soal))
+        c.execute("UPDATE test_psikologi SET soal = ?, nilai_minimum_kelulusan = ?, nilai_maximum_kelulusan = ?"
+                  "WHERE rowid = ?",
+                  (soal_modify, nilai_minimum_kelulusan_modify, nilai_maximum_kelulusan_modify, id_soal))
         conn.commit()
 
         conn.close()
@@ -496,7 +543,7 @@ class Admin(Utility):
             self.printlist()
             self.__delete_lowongan_pekerjaan()
         elif pilihan_menu == "5":
-            print("still working")
+            self.__list_pelamar_kerja()
 
     def menu_utama(self):
         print("Selamat datang di menu Admin")
@@ -555,3 +602,4 @@ while pil_menu != "3":
         print("Terima kasih sampai jumpa kembali")
     else:
         print("Pilihan anda salah silahkan ulangi lagi")
+
