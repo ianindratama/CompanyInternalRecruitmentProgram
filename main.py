@@ -1,13 +1,13 @@
 import sqlite3
 import datetime
+from tkinter import *
+from PIL import ImageTk, Image
 
 # email purpose
 import smtplib
 # libraries for email texting
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
 
 
 class Utility:
@@ -315,6 +315,7 @@ class Evaluate(Utility):
         server.sendmail(from_email, to_email, message)
 
         server.quit()
+
 
 class Admin(Utility):
 
@@ -633,40 +634,94 @@ class Admin(Utility):
                 print("Pilihan anda salah silahkan ulangi lagi")
 
 
+class Window:
+    def __init__(self):
+        self.root = Tk()
+        self.program_geometry = "500x300+525+200"
+        self.date_time_label = Label(self.root, text="", fg="Red", font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=DISABLED)
+        self.menu_utama_button = Button(self.root, text="Menu Utama", state=DISABLED)
+
+        self.menu_utama_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        self.root.title("Program Seleksi Kerja PT XYZ")
+        self.root.iconbitmap('icon.ico')
+        self.root.geometry(self.program_geometry)
+
+    def header(self):
+        program_name_label = Label(self.root, text="Program Seleksi Kerja\nPT XYZ", font=("Helvetica", 20))
+        program_name_label.grid(row=0, rowspan=2, column=0, columnspan=2, padx=(20, 0))
+        # noinspection PyGlobalUndefined
+        global program_logo_image
+        program_logo_image = ImageTk.PhotoImage((Image.open("logo1.png")).resize((75, 75)))
+        program_logo_image_label = Label(self.root, image=program_logo_image)
+        program_logo_image_label.grid(row=0, rowspan=2, column=2, pady=(10, 0))
+
+    def footer(self):
+        # date time label
+        now = datetime.datetime.now().strftime("%A, %B %d %Y %H:%M:%S")
+        self.date_time_label.configure(text=now)
+        self.date_time_label.grid(row=20, column=0, sticky=W, padx=(10, 10))
+
+        # menu sebelumnya
+        self.menu_sebelumnya_button.grid(row=20, column=1, padx=(10, 10))
+
+        # menu utama
+        self.menu_utama_button.grid(row=20, column=2, sticky=E)
+
+        self.root.after(1000, self.footer)
+
+    def menu_utama_pelamar_kerja(self):
+        self.menu_utama_frame.grid_forget()
+        my_label = Label(self.root, text="asiap").grid(row=2, column=0)
+
+    def menu_utama_admin(self):
+        self.menu_utama_frame.grid_forget()
+        my_label = Label(self.root, text="asiap").grid(row=2, column=0)
+
+    def menu_utama(self):
+
+        self.menu_utama_frame.grid(row=2, column=0, columnspan=2)
+
+        btn_pelamar_kerja = Button(self.menu_utama_frame, text="Pelamar Kerja", command=self.menu_utama_pelamar_kerja)
+        btn_admin = Button(self.menu_utama_frame, text="Admin", command=self.menu_utama_admin)
+
+        btn_pelamar_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 60), ipadx=15, ipady=25)
+        btn_admin.grid(row=2, column=1, pady=(35, 60), ipadx=30, ipady=25)
+
+    def keep_program_alive(self):
+        self.root.mainloop()
+
+
 # menu utama
 
-print("Program Seleksi Pelamar Kerja 1.0")
-print("1. Daftar Kerja\t\t2.Admin\t\t3.Keluar Program")
+#
+#     if pil_menu == "1":
+#         menu_pelamar = MenuPelamar()
+#         menu_pelamar.menu_utama()
+#         pelamar = Pelamar(menu_pelamar.get_all_soal())
+#         proses = Evaluate(pelamar.send_to_database())
+#         proses.analisa_kelulusan(proses.retrievedata())
+#         proses.send_ke_email_pelamar()
+#         print("Sukses melamar, silahkan buka email anda untuk pemberitahuan selanjutnya")
+#     elif pil_menu == "2":
+#
+#         admin = Admin()
+#
+#         username = input("Username : ")
+#         password = input("Password : ")
+#
+#         if username == "admin" and password == "admin":
+#             admin.menu_utama()
+#         else:
+#             print("Username / Passowrd anda salah")
+#             print("1. Daftar Kerja\t\t2.Admin\t\t3.Keluar Program")
+#
 
-pil_menu = ""
+# menu utama
 
-while pil_menu != "3":
-
-    pil_menu = input("Pilihan menu : ")
-
-    if pil_menu == "1":
-        menu_pelamar = MenuPelamar()
-        menu_pelamar.menu_utama()
-        pelamar = Pelamar(menu_pelamar.get_all_soal())
-        proses = Evaluate(pelamar.send_to_database())
-        proses.analisa_kelulusan(proses.retrievedata())
-        proses.send_ke_email_pelamar()
-        print("Sukses melamar, silahkan buka email anda untuk pemberitahuan selanjutnya")
-    elif pil_menu == "2":
-
-        admin = Admin()
-
-        username = input("Username : ")
-        password = input("Password : ")
-
-        if username == "admin" and password == "admin":
-            admin.menu_utama()
-        else:
-            print("Username / Passowrd anda salah")
-            print("1. Daftar Kerja\t\t2.Admin\t\t3.Keluar Program")
-
-    elif pil_menu == "3":
-        print("Terima kasih sampai jumpa kembali")
-    else:
-        print("Pilihan anda salah silahkan ulangi lagi")
-
+window = Window()
+window.header()
+window.menu_utama()
+window.footer()
+window.keep_program_alive()
