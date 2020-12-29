@@ -310,7 +310,7 @@ class Evaluate(Utility):
 
         server = smtplib.SMTP("smtp.gmail.com", 587)  # server host, port
         server.starttls()  # secure server
-        server.login(from_email, "ywisfhwwmacvshbi")
+        server.login(from_email, "zhnuybzhqweipuaq")
 
         server.sendmail(from_email, to_email, message)
 
@@ -635,7 +635,7 @@ class Admin(Utility):
 
 # menu utama
 
-print("Program Seleksi Pelamar Kerja")
+print("Program Seleksi Pelamar Kerja 1.0")
 print("1. Daftar Kerja\t\t2.Admin\t\t3.Keluar Program")
 
 pil_menu = ""
