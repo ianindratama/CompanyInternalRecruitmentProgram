@@ -25,32 +25,42 @@ class Utility:
         conn.close()
         return data
 
-    def printlist(self):
+    def printlist(self, frame):
 
         data_lowongan = self.retrievedata("pekerjaan")
 
-        print("No \t Nama Pekerjaan \t Deskripsi Pekerjaan \t Status Pekerjaan", end="")
+        no = Label(frame, text="No", font=("Helvetica", 10))
+        nama_pekerjaan = Label(frame, text="Nama Pekerjaan", font=("Helvetica", 10))
+        deskripsi_pekerjaan = Label(frame, text="Deskripsi Pekerjaan",
+                                    font=("Helvetica", 10))
+        status_pekerjaan = Label(frame, text="Status Pekerjaan", font=("Helvetica", 10))
+
+        no.grid(row=0, column=0, padx=(0, 20))
+        nama_pekerjaan.grid(row=0, column=1, padx=(0, 20))
+        deskripsi_pekerjaan.grid(row=0, column=2, padx=(0, 20))
+        status_pekerjaan.grid(row=0, column=3, padx=(0, 20))
 
         return data_lowongan
 
 
 class MenuPelamar(Utility):
 
-    def printlist(self):
+    def __init__(self):
+        self._no_pekerjaan_pelamar = int()
 
-        data_lowongan = super().printlist()
-        print()
+    def printlist(self, frame):
+
+        data_lowongan = super().printlist(frame)
 
         counter = 1
         for lowongan in data_lowongan:
-            print("{} \t\t".format(counter), end="")
-            counter += 1
+
             for i in range(0, len(lowongan)):
+                if i < 4:
+                    Label(window.menu_utama_pelamar_kerja_frame, text=lowongan[i]).grid(
+                        row=counter, column=i, padx=(0, 20))
 
-                if i != 0 and i < 4:
-                    print(lowongan[i], "\t\t", end="")
-
-            print()
+            counter += 1
 
     def __get_id_pekerjaan(self, no):
         data = super(MenuPelamar, self).retrievedata("pekerjaan")
@@ -82,15 +92,32 @@ class MenuPelamar(Utility):
 
         return soal
 
-    def menu_utama(self):
-        print("Selamat datang Pelamar Kerja")
-        self.printlist()
+    def __submit_pilihan_user(self, value):
+        self._no_pekerjaan_pelamar = int(value[0])
+
+    def menu_utama(self, frame):
+        self.printlist(frame)
+        label_menu_utama_pelamar_kerja = Label(frame, text="Pilih Pekerjaan yang diinginkan")
+        label_menu_utama_pelamar_kerja.grid(row=50, column=0, columnspan=2, pady=(20, 10), padx=(0, 10))
+
+        data = super().retrievedata("pekerjaan")
+        data_option = list()
+        for i in range(0, len(data)):
+            data_option.append(str(i+1) + ".   " + data[i][1])
+
+        pilihan_user = StringVar()
+        pilihan_user.set(data_option[0])
+
+        dropdown_data = OptionMenu(frame, pilihan_user, *data_option)
+        dropdown_data.grid(row=50, column=2, pady=(20, 10), padx=(0, 10), sticky=EW)
+
+        submit_pilihan_pelamar_btn = Button(frame, text="Submit",
+                                            command=lambda: self.__submit_pilihan_user(pilihan_user.get()))
+        submit_pilihan_pelamar_btn.grid(row=50, column=3, pady=(20, 10), ipadx=10, ipady=10)
 
     def get_all_soal(self):
 
-        user_input = int(input("Input No pekerjaan yang diinginkan : "))
-
-        no_pekerjaan = user_input-1
+        no_pekerjaan = self._no_pekerjaan_pelamar-1
 
         return [self.__get_id_pekerjaan(no_pekerjaan), self.__get_nama_pekerjaan(no_pekerjaan),
                 self.__get_soal_kerja(no_pekerjaan), self.__get_soal_psikologi()]
@@ -324,7 +351,7 @@ class Admin(Utility):
 
     # lowongan kerja panel
 
-    def printlist(self):
+    def printlist(self, frame):
 
         data_lowongan = super().printlist()
 
@@ -643,51 +670,101 @@ class Window:
         self.menu_utama_button = Button(self.root, text="Menu Utama", state=DISABLED)
 
         self.menu_utama_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_utama_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_utama_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         self.root.title("Program Seleksi Kerja PT XYZ")
         self.root.iconbitmap('icon.ico')
-        self.root.geometry(self.program_geometry)
+
+    @staticmethod
+    def remove_current_frame(current_frame):
+        current_frame.grid_remove()
 
     def header(self):
         program_name_label = Label(self.root, text="Program Seleksi Kerja\nPT XYZ", font=("Helvetica", 20))
-        program_name_label.grid(row=0, rowspan=2, column=0, columnspan=2, padx=(20, 0))
+        program_name_label.grid(row=0, rowspan=2, column=0, columnspan=2, padx=(20, 10))
         # noinspection PyGlobalUndefined
         global program_logo_image
         program_logo_image = ImageTk.PhotoImage((Image.open("logo1.png")).resize((75, 75)))
         program_logo_image_label = Label(self.root, image=program_logo_image)
-        program_logo_image_label.grid(row=0, rowspan=2, column=2, pady=(10, 0))
+        program_logo_image_label.grid(row=0, rowspan=2, column=2, pady=(10, 10))
 
     def footer(self):
+
+        self.root.rowconfigure(100, weight=1)
+
         # date time label
-        now = datetime.datetime.now().strftime("%A, %B %d %Y %H:%M:%S")
+        now = datetime.datetime.now().strftime("%A, %d %B %Y %H:%M:%S")
         self.date_time_label.configure(text=now)
-        self.date_time_label.grid(row=20, column=0, sticky=W, padx=(10, 10))
+        self.date_time_label.grid(row=100, column=0, sticky=SW, padx=(10, 10))
 
         # menu sebelumnya
-        self.menu_sebelumnya_button.grid(row=20, column=1, padx=(10, 10))
+        self.menu_sebelumnya_button.grid(row=100, column=1, stick=S, padx=(10, 10))
 
         # menu utama
-        self.menu_utama_button.grid(row=20, column=2, sticky=E)
+        self.menu_utama_button.grid(row=100, column=2, sticky=SE)
+
+        Label(self.root).grid(row=101, column=0)
 
         self.root.after(1000, self.footer)
 
-    def menu_utama_pelamar_kerja(self):
-        self.menu_utama_frame.grid_forget()
-        my_label = Label(self.root, text="asiap").grid(row=2, column=0)
-
-    def menu_utama_admin(self):
-        self.menu_utama_frame.grid_forget()
-        my_label = Label(self.root, text="asiap").grid(row=2, column=0)
-
     def menu_utama(self):
-
+        self.root.geometry(self.program_geometry)
         self.menu_utama_frame.grid(row=2, column=0, columnspan=2)
 
-        btn_pelamar_kerja = Button(self.menu_utama_frame, text="Pelamar Kerja", command=self.menu_utama_pelamar_kerja)
-        btn_admin = Button(self.menu_utama_frame, text="Admin", command=self.menu_utama_admin)
+        btn_pelamar_kerja = Button(self.menu_utama_frame, text="Pelamar Kerja",
+                                   command=lambda: [self.remove_current_frame(self.menu_utama_frame),
+                                                    self.menu_utama_pelamar_kerja()])
 
-        btn_pelamar_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 60), ipadx=15, ipady=25)
-        btn_admin.grid(row=2, column=1, pady=(35, 60), ipadx=30, ipady=25)
+        btn_admin = Button(self.menu_utama_frame, text="Admin",
+                           command=lambda: [self.remove_current_frame(self.menu_utama_frame),
+                                            self.menu_utama_admin()])
+
+        btn_pelamar_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 40), ipadx=15, ipady=25)
+        btn_admin.grid(row=2, column=1, pady=(35, 40), ipadx=30, ipady=25)
+
+        # footer section
+        self.menu_utama_button = Button(self.root, text="Menu Utama", state=DISABLED)
+        self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=DISABLED)
+        self.footer()
+
+    def menu_utama_pelamar_kerja(self):
+        self.program_geometry = "550x300+525+200"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_utama_frame.grid_remove()
+        self.menu_utama_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        menu_pelamar = MenuPelamar()
+        menu_pelamar.menu_utama(window.menu_utama_pelamar_kerja_frame)
+
+        # footer section
+        self.menu_utama_button = Button(self.root, text="Menu Utama", state=ACTIVE,
+                                        command=lambda: [self.remove_current_frame(self.menu_utama_pelamar_kerja_frame),
+                                                         self.menu_utama()])
+
+        self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=ACTIVE,
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_utama_pelamar_kerja_frame),
+                                                 self.menu_utama()])
+        self.footer()
+
+    def menu_utama_admin(self):
+        self.menu_utama_frame.grid_remove()
+        self.menu_utama_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE")
+
+        my_label = Label(self.menu_utama_admin_frame, text="asiap").grid(row=2, column=0)
+
+        # footer section
+        self.menu_utama_button = Button(self.root, text="Menu Utama", state=ACTIVE,
+                                        command=lambda: [self.remove_current_frame(self.menu_utama_admin_frame),
+                                                         self.menu_utama()])
+
+        self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=ACTIVE,
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_utama_admin_frame ),
+                                                 self.menu_utama()])
+        self.footer()
 
     def keep_program_alive(self):
         self.root.mainloop()
@@ -723,5 +800,4 @@ class Window:
 window = Window()
 window.header()
 window.menu_utama()
-window.footer()
 window.keep_program_alive()
