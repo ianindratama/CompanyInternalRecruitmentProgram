@@ -46,7 +46,7 @@ class Utility:
 class MenuPelamar(Utility):
 
     def __init__(self):
-        self._no_pekerjaan_pelamar = int()
+        self.__no_pekerjaan_pelamar = int()
 
     def printlist(self, frame):
 
@@ -93,7 +93,7 @@ class MenuPelamar(Utility):
         return soal
 
     def __submit_pilihan_user(self, value):
-        self._no_pekerjaan_pelamar = int(value[0])
+        self.__no_pekerjaan_pelamar = int(value[0])
 
     def menu_utama(self, frame):
         self.printlist(frame)
@@ -112,63 +112,89 @@ class MenuPelamar(Utility):
         dropdown_data.grid(row=50, column=2, pady=(20, 10), padx=(0, 10), sticky=EW)
 
         submit_pilihan_pelamar_btn = Button(frame, text="Submit",
-                                            command=lambda: self.__submit_pilihan_user(pilihan_user.get()))
+                                            command=lambda: [self.__submit_pilihan_user(pilihan_user.get()),
+                                                             window.remove_current_frame(frame),
+                                                             window.menu_isi_data_pelamar_kerja()])
         submit_pilihan_pelamar_btn.grid(row=50, column=3, pady=(20, 10), ipadx=10, ipady=10)
 
     def get_all_soal(self):
 
-        no_pekerjaan = self._no_pekerjaan_pelamar-1
+        no_pekerjaan = self.__no_pekerjaan_pelamar-1
 
         return [self.__get_id_pekerjaan(no_pekerjaan), self.__get_nama_pekerjaan(no_pekerjaan),
                 self.__get_soal_kerja(no_pekerjaan), self.__get_soal_psikologi()]
 
 
-class Pelamar(MenuPelamar):
+class Pelamar:
 
-    def __init__(self, data):
+    def __init__(self, frame, data):
 
         self.__id_pekerjaan = data[0]
         self.__status_kelulusan = "-"
 
-        print("Isi Data Diri")
-        self.__nama_lengkap = input("Nama Lengkap : ")
-        self.__email = input("Email : ")
-        self.__no_hp = input("No HP : ")
-        self.__jenis_kelamin = input("Jenis Kelamin (L : Laki - Laki | P : Perempuan) : ")
-        self.__pendidikan_terakhir = input("Pendidikan terakhir : ")
-        self.__lama_pengalaman_kerja = input("Pengalaman Kerja (dalam tahun ex : 5) : ")
+        Label(frame, text="Isi Data Diri", font=("Helvetica", 10)).grid(row=0, column=0, pady=(0, 10), sticky=W)
+
+        Label(frame, text="Nama Lengkap", font=("Helvetica", 10)).grid(row=1, column=0, sticky=W, pady=(0, 10))
+        self.__nama_lengkap = Entry(frame, width=40)
+        self.__nama_lengkap.grid(row=1, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
+
+        Label(frame, text="Email", font=("Helvetica", 10)).grid(row=2, column=0, sticky=W, pady=(0, 10))
+        self.__email = Entry(frame, width=40)
+        self.__email.grid(row=2, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
+
+        Label(frame, text="No HP", font=("Helvetica", 10)).grid(row=3, column=0, sticky=W, pady=(0, 10))
+        self.__no_hp = Entry(frame, width=40)
+        self.__no_hp.grid(row=3, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
+
+        Label(frame, text="Jenis Kelamin ", font=("Helvetica", 10)).grid(row=4, column=0, sticky=W, pady=(0, 10))
+        self.__jenis_kelamin = Entry(frame, width=40)
+        self.__jenis_kelamin.insert(0, "(L : Laki - Laki | P : Perempuan)")
+        self.__jenis_kelamin.bind("<Button-1>", lambda event: window.clear_entry(event, self.__jenis_kelamin))
+        self.__jenis_kelamin.grid(row=4, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
+
+        Label(frame, text="Pendidikan terakhir", font=("Helvetica", 10)).grid(row=5, column=0, sticky=W, pady=(0, 10))
+        self.__pendidikan_terakhir = Entry(frame, width=40)
+        self.__pendidikan_terakhir.grid(row=5, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
+
+        Label(frame, text="Pengalaman Kerja di bidang " + data[1],
+              font=("Helvetica", 10)).grid(row=6, column=0, sticky=W, pady=(0, 10))
+        self.__lama_pengalaman_kerja = Entry(frame, width=40)
+        self.__lama_pengalaman_kerja.insert(0, "(dalam tahun ex : 5)")
+        self.__lama_pengalaman_kerja.bind("<Button-1>",
+                                          lambda event: window.clear_entry(event, self.__lama_pengalaman_kerja))
+        self.__lama_pengalaman_kerja.grid(row=6, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
 
         x = datetime.datetime.now()
         self.__tanggal_applied = x.strftime("%d/%m/%Y")
 
-        print("Pertanyaan mengenai Lowongan Pekerjaan " + data[1])
-        print("5 : Sangat Bisa | 4 : Cukup Bisa | 3 : Bisa | 2 : Kurang Bisa | 1 : Tidak Bisa")
-
-        self.__tuple_jawaban_kerja = list()
-
-        for s in data[2]:
-            self.__tuple_jawaban_kerja.append(input("" + s + " : "))
-
-        self.__tuple_jawaban_kerja = tuple(self.__tuple_jawaban_kerja)
-
-        print("Test Psikologi")
-        print("5 : Sangat Setuju | 4 : Cukup Setuju | 3 : Setuju | 2 : Kurang Setuju | 1 : Tidak Setuju")
-
-        self.__tuple_jawaban_psikologi = list()
-
-        for s in data[3]:
-            self.__tuple_jawaban_psikologi.append(input("" + s + " : "))
-
-        self.__tuple_jawaban_psikologi = tuple(self.__tuple_jawaban_psikologi)
-
-        self.__tuple_jawaban_gabungan = self.__tuple_jawaban_kerja + self.__tuple_jawaban_psikologi
-
-        self.__tupleData_send_to_database = (self.__id_pekerjaan, self.__status_kelulusan, self.__nama_lengkap,
-                                             self.__email, self.__no_hp, self.__jenis_kelamin,
-                                             self.__pendidikan_terakhir, self.__lama_pengalaman_kerja,
-                                             self.__tanggal_applied)
-
-        self.__tupleData_send_to_database = self.__tupleData_send_to_database + self.__tuple_jawaban_gabungan
+        # print("Pertanyaan mengenai Lowongan Pekerjaan " + data[1])
+        # print("5 : Sangat Bisa | 4 : Cukup Bisa | 3 : Bisa | 2 : Kurang Bisa | 1 : Tidak Bisa")
+        #
+        # self.__tuple_jawaban_kerja = list()
+        #
+        # for s in data[2]:
+        #     self.__tuple_jawaban_kerja.append(input("" + s + " : "))
+        #
+        # self.__tuple_jawaban_kerja = tuple(self.__tuple_jawaban_kerja)
+        #
+        # print("Test Psikologi")
+        # print("5 : Sangat Setuju | 4 : Cukup Setuju | 3 : Setuju | 2 : Kurang Setuju | 1 : Tidak Setuju")
+        #
+        # self.__tuple_jawaban_psikologi = list()
+        #
+        # for s in data[3]:
+        #     self.__tuple_jawaban_psikologi.append(input("" + s + " : "))
+        #
+        # self.__tuple_jawaban_psikologi = tuple(self.__tuple_jawaban_psikologi)
+        #
+        # self.__tuple_jawaban_gabungan = self.__tuple_jawaban_kerja + self.__tuple_jawaban_psikologi
+        #
+        # self.__tupleData_send_to_database = (self.__id_pekerjaan, self.__status_kelulusan, self.__nama_lengkap,
+        #                                      self.__email, self.__no_hp, self.__jenis_kelamin,
+        #                                      self.__pendidikan_terakhir, self.__lama_pengalaman_kerja,
+        #                                      self.__tanggal_applied)
+        #
+        # self.__tupleData_send_to_database = self.__tupleData_send_to_database + self.__tuple_jawaban_gabungan
 
     def send_to_database(self):
         conn = sqlite3.connect("jobs.db")
@@ -672,6 +698,9 @@ class Window:
         self.menu_utama_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_utama_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_utama_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_isi_data_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        self.menu_pelamar = MenuPelamar()
 
         self.root.title("Program Seleksi Kerja PT XYZ")
         self.root.iconbitmap('icon.ico')
@@ -679,6 +708,10 @@ class Window:
     @staticmethod
     def remove_current_frame(current_frame):
         current_frame.grid_remove()
+
+    @staticmethod
+    def clear_entry(event, entry):
+        entry.delete(0, END)
 
     def header(self):
         program_name_label = Label(self.root, text="Program Seleksi Kerja\nPT XYZ", font=("Helvetica", 20))
@@ -732,11 +765,9 @@ class Window:
         self.program_geometry = "550x300+525+200"
         self.root.geometry(self.program_geometry)
 
-        self.menu_utama_frame.grid_remove()
         self.menu_utama_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
-        menu_pelamar = MenuPelamar()
-        menu_pelamar.menu_utama(window.menu_utama_pelamar_kerja_frame)
+        self.menu_pelamar.menu_utama(window.menu_utama_pelamar_kerja_frame)
 
         # footer section
         self.menu_utama_button = Button(self.root, text="Menu Utama", state=ACTIVE,
@@ -749,8 +780,16 @@ class Window:
                                                  self.menu_utama()])
         self.footer()
 
+    def menu_isi_data_pelamar_kerja(self):
+        self.program_geometry = "550x700+525+50"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_isi_data_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        pelamar = Pelamar(self.menu_isi_data_pelamar_kerja_frame, self.menu_pelamar.get_all_soal())
+
+
     def menu_utama_admin(self):
-        self.menu_utama_frame.grid_remove()
         self.menu_utama_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE")
 
         my_label = Label(self.menu_utama_admin_frame, text="asiap").grid(row=2, column=0)
@@ -762,7 +801,7 @@ class Window:
 
         self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=ACTIVE,
                                              command=lambda: [
-                                                 self.remove_current_frame(self.menu_utama_admin_frame ),
+                                                 self.remove_current_frame(self.menu_utama_admin_frame),
                                                  self.menu_utama()])
         self.footer()
 
