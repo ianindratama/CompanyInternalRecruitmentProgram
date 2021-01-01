@@ -197,7 +197,7 @@ class Pelamar:
         if self.__jenis_kelamin == "(L : Laki - Laki | P : Perempuan)":
             self.__jenis_kelamin = Entry(frame, width=40)
             self.__jenis_kelamin.insert(0, "(L : Laki - Laki | P : Perempuan)")
-            self.__jenis_kelamin.bind("<Button-1>", lambda event: window.clear_entry(event, self.__jenis_kelamin))
+            self.__jenis_kelamin.bind("<Button-1>", lambda event: window.clear_entry(self.__jenis_kelamin))
         else:
             temp = self.__jenis_kelamin.get()
             self.__jenis_kelamin = Entry(frame, width=40)
@@ -219,7 +219,7 @@ class Pelamar:
             self.__lama_pengalaman_kerja = Entry(frame, width=40)
             self.__lama_pengalaman_kerja.insert(0, "(dalam tahun ex : 5)")
             self.__lama_pengalaman_kerja.bind("<Button-1>",
-                                              lambda event: window.clear_entry(event, self.__lama_pengalaman_kerja))
+                                              lambda event: window.clear_entry(self.__lama_pengalaman_kerja))
         else:
             temp = self.__lama_pengalaman_kerja.get()
             self.__lama_pengalaman_kerja = Entry(frame, width=40)
@@ -383,7 +383,8 @@ class Evaluate(Utility):
         return [data_pelamar, data_pekerjaan, data_soal_kerja,
                 data_jawaban_gabungan, data_nilai_kelulusan_psikologi]
 
-    def analisa_kelulusan(self, data):
+    @staticmethod
+    def analisa_kelulusan(data):
 
         # analisa jawaban kerja
 
@@ -842,10 +843,16 @@ class Window:
         self.menu_akhir_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_akhir_pelamar_kerja_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
-        # frame menu admin
-        self.menu_utama_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        # frame menu login admin
+        self.menu_login_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_login_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_login_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
-        self.menu_pelamar = MenuPelamar()
+        # frame menu utama admin
+        self.menu_utama_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_utama_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_utama_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
 
         self.root.title("Program Seleksi Kerja PT XYZ")
         self.root.iconbitmap('icon.ico')
@@ -855,7 +862,7 @@ class Window:
         current_frame.grid_remove()
 
     @staticmethod
-    def clear_entry(event, entry):
+    def clear_entry(entry):
         entry.delete(0, END)
 
     def header(self, frame):
@@ -903,7 +910,7 @@ class Window:
                            command=lambda: [self.remove_current_frame(self.menu_utama_header_frame),
                                             self.remove_current_frame(self.menu_utama_frame),
                                             self.remove_current_frame(self.menu_utama_footer_frame),
-                                            self.menu_utama_admin()])
+                                            self.menu_login_admin("true")])
 
         btn_pelamar_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
         btn_admin.grid(row=2, column=1, pady=(35, 50), ipadx=30, ipady=25)
@@ -923,12 +930,15 @@ class Window:
         self.menu_utama_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_utama_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
+        # instantiate menu pelamar
+        menu_pelamar = MenuPelamar()
+
         # header section
         self.header(self.menu_utama_pelamar_kerja_header_frame)
 
         # container section
-        self.menu_pelamar.menu_utama(self.menu_utama_pelamar_kerja_header_frame, self.menu_utama_pelamar_kerja_frame,
-                                     self.menu_utama_pelamar_kerja_footer_frame)
+        menu_pelamar.menu_utama(self.menu_utama_pelamar_kerja_header_frame, self.menu_utama_pelamar_kerja_frame,
+                                self.menu_utama_pelamar_kerja_footer_frame)
 
         # footer section
         self.date_time_label = Label(self.menu_utama_pelamar_kerja_footer_frame, text="", fg="Red",
@@ -1143,22 +1153,111 @@ class Window:
                                         ])
         self.footer(self.menu_akhir_pelamar_kerja_footer_frame)
 
-    def menu_utama_admin(self):
-        self.menu_utama_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE")
-        self.menu_utama_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE")
+    def admin_verification(self, header_frame, frame, footer_frame, username, password):
+        username = username.get()
+        password = password.get()
 
-        my_label = Label(self.menu_utama_admin_frame, text="asiap").grid(row=2, column=0)
+        if username == "admin" and password == "admin":
+            self.remove_current_frame(header_frame)
+            self.remove_current_frame(frame)
+            self.remove_current_frame(footer_frame)
+            self.menu_utama_admin()
+        else:
+            self.menu_login_admin("false")
+
+    def menu_login_admin(self, check):
+        self.program_geometry = "500x310+525+200"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_login_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=2)
+        self.menu_login_admin_frame.grid(row=2, column=0, columnspan=2)
+        self.menu_login_admin_footer_frame.grid(row=3, column=0, columnspan=2)
+
+        # header section
+        self.header(self.menu_login_admin_header_frame)
+
+        # container section
+        Label(self.menu_login_admin_frame, text="Username", font=("Helvetica", 10)).grid(row=0, column=0, columnspan=2,
+                                                                                         padx=(0, 25),
+                                                                                         pady=(15, 15))
+        Label(self.menu_login_admin_frame, text="Password", font=("Helvetica", 10)).grid(row=1, column=0, columnspan=2,
+                                                                                         padx=(0, 30),
+                                                                                         pady=(0, 20))
+
+        username_input = Entry(self.menu_login_admin_frame)
+        username_input.grid(row=0, column=2, pady=(20, 20))
+
+        password_input = Entry(self.menu_login_admin_frame)
+        password_input.grid(row=1, column=2, pady=(0, 20))
+
+        submit_btn = Button(self.menu_login_admin_frame, text="Submit", font=("Helvetica", 10),
+                            command=lambda: self.admin_verification(self.menu_login_admin_header_frame,
+                                                                    self.menu_login_admin_frame,
+                                                                    self.menu_login_admin_footer_frame,
+                                                                    username_input, password_input))
+        submit_btn.grid(row=2, column=2, pady=(0, 10))
+
+        label_check = Label(self.menu_login_admin_frame, text="Username atau Password anda salah, silahkan coba lagi",
+                            font=("Helvetica", "10", "bold"), fg=self.menu_login_admin_frame.cget('bg'))
+        label_check.grid(row=3, column=0, columnspan=3, pady=(0, 10))
+
+        if check != "true":
+            label_check.configure(fg="red")
 
         # footer section
-        self.menu_utama_button = Button(self.root, text="Menu Utama", state=ACTIVE,
-                                        command=lambda: [self.remove_current_frame(self.menu_utama_admin_frame),
-                                                         self.menu_utama()])
-
-        self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=ACTIVE,
+        self.date_time_label = Label(self.menu_login_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_login_admin_footer_frame, text="Menu Sebelumnya",
                                              command=lambda: [
-                                                 self.remove_current_frame(self.menu_utama_admin_frame),
+                                                 self.remove_current_frame(self.menu_login_admin_header_frame),
+                                                 self.remove_current_frame(self.menu_login_admin_frame),
+                                                 self.remove_current_frame(self.menu_login_admin_footer_frame),
                                                  self.menu_utama()])
-        self.footer(self.menu_utama_admin_frame)
+        self.menu_utama_button = Button(self.menu_login_admin_footer_frame, text="Menu Utama",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_login_admin_header_frame),
+                                            self.remove_current_frame(self.menu_login_admin_frame),
+                                            self.remove_current_frame(self.menu_login_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_login_admin_footer_frame)
+
+    def menu_utama_admin(self):
+        self.program_geometry = "500x310+525+200"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_utama_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=2)
+        self.menu_utama_admin_frame.grid(row=2, column=0, columnspan=2)
+        self.menu_utama_admin_footer_frame.grid(row=3, column=0, columnspan=2)
+
+        # header section
+        self.header(self.menu_utama_admin_header_frame)
+
+        # container section
+        btn_panel_kerja = Button(self.menu_utama_admin_frame, text="Panel Lowongan Kerja",
+                                 command=lambda: [self.remove_current_frame(self.menu_utama_admin_header_frame),
+                                                  self.remove_current_frame(self.menu_utama_admin_frame),
+                                                  self.remove_current_frame(self.menu_utama_admin_footer_frame)])
+
+        btn_panel_psikologi = Button(self.menu_utama_admin_frame, text="Panel Test Psikologi",
+                                     command=lambda: [self.remove_current_frame(self.menu_utama_admin_header_frame),
+                                                      self.remove_current_frame(self.menu_utama_admin_frame),
+                                                      self.remove_current_frame(self.menu_utama_admin_footer_frame)])
+
+        btn_panel_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
+        btn_panel_psikologi.grid(row=2, column=1, pady=(35, 50), ipadx=30, ipady=25)
+
+        # footer section
+        self.date_time_label = Label(self.menu_utama_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_utama_admin_footer_frame, text="Menu Sebelumnya",
+                                             state=DISABLED)
+        self.menu_utama_button = Button(self.menu_utama_admin_footer_frame, text="Menu Utama",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_utama_admin_header_frame),
+                                            self.remove_current_frame(self.menu_utama_admin_frame),
+                                            self.remove_current_frame(self.menu_utama_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_utama_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
