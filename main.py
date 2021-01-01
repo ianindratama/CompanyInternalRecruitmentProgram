@@ -1166,15 +1166,7 @@ class Window:
 
 # menu utama
 
-#
-#     if pil_menu == "1":
-#         menu_pelamar = MenuPelamar()
-#         menu_pelamar.menu_utama()
-#         pelamar = Pelamar(menu_pelamar.get_all_soal())
-#         proses = Evaluate(pelamar.send_to_database())
-#         proses.analisa_kelulusan(proses.retrievedata())
-#         proses.send_ke_email_pelamar()
-#         print("Sukses melamar, silahkan buka email anda untuk pemberitahuan selanjutnya")
+
 #     elif pil_menu == "2":
 #
 #         admin = Admin()
