@@ -802,6 +802,8 @@ class Admin(Utility):
 class Window:
     def __init__(self):
         self.root = Tk()
+        self.root.title("Program Seleksi Kerja PT XYZ")
+        self.root.iconbitmap('icon.ico')
         self.root.rowconfigure(3, weight=1)
         self.program_geometry = "500x300+525+200"
         self.date_time_label = Label(self.root, text="", fg="Red", font=("Helvetica", 10))
@@ -853,9 +855,24 @@ class Window:
         self.menu_utama_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_utama_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
+        # frame menu panel lowongan kerja admin
+        self.menu_panel_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_panel_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_panel_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
-        self.root.title("Program Seleksi Kerja PT XYZ")
-        self.root.iconbitmap('icon.ico')
+        # frame menu list lowongan kerja admin
+
+        # frame menu list pelamar kerja admin
+
+        # frame menu input lowongan kerja admin
+        self.menu_input_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu input akhir lowongan kerja admin
+        self.menu_input_akhir_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_akhir_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_akhir_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
     @staticmethod
     def remove_current_frame(current_frame):
@@ -912,8 +929,8 @@ class Window:
                                             self.remove_current_frame(self.menu_utama_footer_frame),
                                             self.menu_login_admin("true")])
 
-        btn_pelamar_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
-        btn_admin.grid(row=2, column=1, pady=(35, 50), ipadx=30, ipady=25)
+        btn_pelamar_kerja.grid(row=0, column=0, padx=(0, 50), pady=(35, 50), ipadx=15, ipady=25)
+        btn_admin.grid(row=0, column=1, padx=(0, 65), pady=(35, 50), ipadx=30, ipady=25)
 
         # footer section
         self.date_time_label = Label(self.menu_utama_footer_frame, text="", fg="Red", font=("Helvetica", 10))
@@ -1177,32 +1194,29 @@ class Window:
         self.header(self.menu_login_admin_header_frame)
 
         # container section
-        Label(self.menu_login_admin_frame, text="Username", font=("Helvetica", 10)).grid(row=0, column=0, columnspan=2,
-                                                                                         padx=(0, 25),
-                                                                                         pady=(15, 15))
-        Label(self.menu_login_admin_frame, text="Password", font=("Helvetica", 10)).grid(row=1, column=0, columnspan=2,
-                                                                                         padx=(0, 30),
-                                                                                         pady=(0, 20))
+        Label(self.menu_login_admin_frame, text="Username", font=("Helvetica", 10)).grid(row=0, column=0, pady=(15, 15))
+        Label(self.menu_login_admin_frame, text="Password", font=("Helvetica", 10)).grid(row=1, column=0, pady=(0, 20))
 
         username_input = Entry(self.menu_login_admin_frame)
-        username_input.grid(row=0, column=2, pady=(20, 20))
+        username_input.grid(row=0, column=1, columnspan=2, pady=(20, 20), sticky=W)
 
         password_input = Entry(self.menu_login_admin_frame)
-        password_input.grid(row=1, column=2, pady=(0, 20))
+        password_input.grid(row=1, column=1, columnspan=2, pady=(0, 20), sticky=W)
 
         submit_btn = Button(self.menu_login_admin_frame, text="Submit", font=("Helvetica", 10),
                             command=lambda: self.admin_verification(self.menu_login_admin_header_frame,
                                                                     self.menu_login_admin_frame,
                                                                     self.menu_login_admin_footer_frame,
                                                                     username_input, password_input))
-        submit_btn.grid(row=2, column=2, pady=(0, 10))
+        submit_btn.grid(row=2, column=1, pady=(0, 10))
 
         label_check = Label(self.menu_login_admin_frame, text="Username atau Password anda salah, silahkan coba lagi",
                             font=("Helvetica", "10", "bold"), fg=self.menu_login_admin_frame.cget('bg'))
-        label_check.grid(row=3, column=0, columnspan=3, pady=(0, 10))
 
         if check != "true":
             label_check.configure(fg="red")
+
+        label_check.grid(row=3, column=0, columnspan=3, pady=(0, 10))
 
         # footer section
         self.date_time_label = Label(self.menu_login_admin_footer_frame, text="", fg="Red",
@@ -1236,15 +1250,16 @@ class Window:
         btn_panel_kerja = Button(self.menu_utama_admin_frame, text="Panel Lowongan Kerja",
                                  command=lambda: [self.remove_current_frame(self.menu_utama_admin_header_frame),
                                                   self.remove_current_frame(self.menu_utama_admin_frame),
-                                                  self.remove_current_frame(self.menu_utama_admin_footer_frame)])
+                                                  self.remove_current_frame(self.menu_utama_admin_footer_frame),
+                                                  self.menu_panel_kerja_admin()])
 
         btn_panel_psikologi = Button(self.menu_utama_admin_frame, text="Panel Test Psikologi",
                                      command=lambda: [self.remove_current_frame(self.menu_utama_admin_header_frame),
                                                       self.remove_current_frame(self.menu_utama_admin_frame),
                                                       self.remove_current_frame(self.menu_utama_admin_footer_frame)])
 
-        btn_panel_kerja.grid(row=2, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
-        btn_panel_psikologi.grid(row=2, column=1, pady=(35, 50), ipadx=30, ipady=25)
+        btn_panel_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
+        btn_panel_psikologi.grid(row=0, column=1, pady=(35, 50), ipadx=30, ipady=25)
 
         # footer section
         self.date_time_label = Label(self.menu_utama_admin_footer_frame, text="", fg="Red",
@@ -1258,6 +1273,73 @@ class Window:
                                             self.remove_current_frame(self.menu_utama_admin_footer_frame),
                                             self.menu_utama()])
         self.footer(self.menu_utama_admin_footer_frame)
+
+    def menu_panel_kerja_admin(self):
+        self.program_geometry = "670x450+425+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_panel_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3)
+        self.menu_panel_kerja_admin_frame.grid(row=2, column=0, columnspan=3)
+        self.menu_panel_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3)
+
+        # header section
+        self.header(self.menu_panel_kerja_admin_header_frame)
+
+        # container section
+        btn_list_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="List Lowongan Kerja",
+                                         command=lambda: [
+                                             self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
+                                             self.remove_current_frame(self.menu_panel_kerja_admin_frame),
+                                             self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
+                                             ])
+
+        btn_list_pelamar_kerja = Button(self.menu_panel_kerja_admin_frame, text="List Pelamar Kerja",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_frame),
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame)])
+
+        btn_input_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="Input Lowongan Kerja",
+                                          command=lambda: [
+                                              self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
+                                              self.remove_current_frame(self.menu_panel_kerja_admin_frame),
+                                              self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
+                                              self.menu_input_kerja_admin()])
+
+        btn_modify_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="Modifikasi Lowongan Kerja",
+                                           command=lambda: [
+                                               self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
+                                               self.remove_current_frame(self.menu_panel_kerja_admin_frame),
+                                               self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame)])
+
+        btn_hapus_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="Hapus Lowongan Kerja",
+                                          command=lambda: [
+                                              self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
+                                              self.remove_current_frame(self.menu_panel_kerja_admin_frame),
+                                              self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame)])
+
+        btn_list_lowongan_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25)
+        btn_list_pelamar_kerja.grid(row=0, column=2, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25, sticky=E)
+        btn_input_lowongan_kerja.grid(row=1, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
+        btn_modify_lowongan_kerja.grid(row=1, column=1, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
+        btn_hapus_lowongan_kerja.grid(row=1, column=2, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
+
+        # footer section
+        self.date_time_label = Label(self.menu_panel_kerja_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_panel_kerja_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_utama_admin_header_frame),
+                                                 self.remove_current_frame(self.menu_utama_admin_frame),
+                                                 self.remove_current_frame(self.menu_utama_admin_footer_frame),
+                                                 self.menu_utama_admin()])
+        self.menu_utama_button = Button(self.menu_panel_kerja_admin_footer_frame, text="Menu Utama",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_frame),
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_panel_kerja_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
