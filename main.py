@@ -61,9 +61,12 @@ class MenuPelamar(Utility):
         for lowongan in data_lowongan:
 
             for i in range(0, len(lowongan)):
-                if i < 4:
-                    Label(window.menu_utama_pelamar_kerja_frame, text=lowongan[i]).grid(
-                        row=counter, column=i, padx=(0, 20))
+
+                if i == 0:
+                    Label(frame, text=str(counter)).grid(row=counter, column=i, padx=(0, 20))
+
+                if 0 < i < 4:
+                    Label(frame, text=lowongan[i]).grid(row=counter, column=i, padx=(0, 20))
 
             counter += 1
 
@@ -98,7 +101,16 @@ class MenuPelamar(Utility):
         return soal
 
     def __submit_pilihan_user(self, value):
-        self.__no_pekerjaan_pelamar = int(value[0])
+
+        temp = ""
+
+        for v in value:
+            if v != ".":
+                temp += v
+            else:
+                break
+
+        self.__no_pekerjaan_pelamar = int(temp)
 
     def menu_utama(self, header_frame, frame, footer_frame):
         self.printlist(frame)
@@ -122,7 +134,9 @@ class MenuPelamar(Utility):
                                                              window.remove_current_frame(frame),
                                                              window.remove_current_frame(footer_frame),
                                                              window.menu_isi_data_diri_pelamar_kerja(
-                                                                 Pelamar(self.get_all_soal()))])
+                                                                 Pelamar(self.get_all_soal()),
+                                                                 LabelFrame(window.root, bd=0,
+                                                                            highlightthickness=0))])
         submit_pilihan_pelamar_btn.grid(row=50, column=3, pady=(20, 30), ipadx=10, ipady=10)
 
     def get_all_soal(self):
@@ -146,7 +160,7 @@ class Pelamar:
         self.__email = ""
         self.__no_hp = ""
         self.__jenis_kelamin = "(L : Laki - Laki | P : Perempuan)"
-        self.__pendidikan_terakhir = ""
+        self.__pendidikan_terakhir = "(ex : S1 Teknik Komputer)"
         self.__lama_pengalaman_kerja = "(dalam tahun ex : 5)"
         self.__tanggal_applied = datetime.datetime.now().strftime("%d/%m/%Y")
 
@@ -170,7 +184,7 @@ class Pelamar:
         if self.__nama_lengkap == "":
             self.__nama_lengkap = Entry(frame, width=40)
         else:
-            temp = self.__nama_lengkap.get()
+            temp = self.__nama_lengkap
             self.__nama_lengkap = Entry(frame, width=40)
             self.__nama_lengkap.insert(0, temp)
         self.__nama_lengkap.grid(row=1, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
@@ -179,7 +193,7 @@ class Pelamar:
         if self.__email == "":
             self.__email = Entry(frame, width=40)
         else:
-            temp = self.__email.get()
+            temp = self.__email
             self.__email = Entry(frame, width=40)
             self.__email.insert(0, temp)
         self.__email.grid(row=2, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
@@ -188,7 +202,7 @@ class Pelamar:
         if self.__no_hp == "":
             self.__no_hp = Entry(frame, width=40)
         else:
-            temp = self.__no_hp.get()
+            temp = self.__no_hp
             self.__no_hp = Entry(frame, width=40)
             self.__no_hp.insert(0, temp)
         self.__no_hp.grid(row=3, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
@@ -197,18 +211,22 @@ class Pelamar:
         if self.__jenis_kelamin == "(L : Laki - Laki | P : Perempuan)":
             self.__jenis_kelamin = Entry(frame, width=40)
             self.__jenis_kelamin.insert(0, "(L : Laki - Laki | P : Perempuan)")
-            self.__jenis_kelamin.bind("<Button-1>", lambda event: window.clear_entry(self.__jenis_kelamin))
+            self.__jenis_kelamin.bind("<Button-1>",
+                                      lambda event: window.clear_entry_jenis_kelamin_once(self.__jenis_kelamin))
         else:
-            temp = self.__jenis_kelamin.get()
+            temp = self.__jenis_kelamin
             self.__jenis_kelamin = Entry(frame, width=40)
             self.__jenis_kelamin.insert(0, temp)
         self.__jenis_kelamin.grid(row=4, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
 
         Label(frame, text="Pendidikan terakhir", font=("Helvetica", 10)).grid(row=5, column=0, sticky=W, pady=(0, 10))
-        if self.__pendidikan_terakhir == "":
+        if self.__pendidikan_terakhir == "(ex : S1 Teknik Komputer)":
             self.__pendidikan_terakhir = Entry(frame, width=40)
+            self.__pendidikan_terakhir.insert(0, "(ex : S1 Teknik Komputer)")
+            self.__pendidikan_terakhir.bind("<Button-1>", lambda event: window.clear_entry_pendidikan_terakhir_once(
+                self.__pendidikan_terakhir))
         else:
-            temp = self.__pendidikan_terakhir.get()
+            temp = self.__pendidikan_terakhir
             self.__pendidikan_terakhir = Entry(frame, width=40)
             self.__pendidikan_terakhir.insert(0, temp)
         self.__pendidikan_terakhir.grid(row=5, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
@@ -219,9 +237,10 @@ class Pelamar:
             self.__lama_pengalaman_kerja = Entry(frame, width=40)
             self.__lama_pengalaman_kerja.insert(0, "(dalam tahun ex : 5)")
             self.__lama_pengalaman_kerja.bind("<Button-1>",
-                                              lambda event: window.clear_entry(self.__lama_pengalaman_kerja))
+                                              lambda event: window.clear_entry_pengalaman_kerja_once(
+                                                  self.__lama_pengalaman_kerja))
         else:
-            temp = self.__lama_pengalaman_kerja.get()
+            temp = self.__lama_pengalaman_kerja
             self.__lama_pengalaman_kerja = Entry(frame, width=40)
             self.__lama_pengalaman_kerja.insert(0, temp)
         self.__lama_pengalaman_kerja.grid(row=6, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
@@ -244,7 +263,7 @@ class Pelamar:
               font=("Helvetica", 10)).grid(row=1, column=0, columnspan=3, pady=(0, 10), sticky=W)
 
         for i in range(0, len(self.__data[2])):
-            Label(frame, text=self.__data[2][i], font=("Helvetica", 10)).grid(
+            Label(frame, text=self.__data[2][i], anchor=W, font=("Helvetica", 10)).grid(
                 row=(2 + i), column=0, padx=(10, 10), pady=(0, 10), sticky=W)
 
             # radio button option frame for pertanyaan kerja
@@ -279,7 +298,7 @@ class Pelamar:
                             value=radio_button_options[j][1]).grid(
                     row=0, column=j, pady=(0, 10))
 
-    def get_data(self):
+    def get_data_diri(self):
         # data diri
         self.__nama_lengkap = self.__nama_lengkap.get()
         self.__email = self.__email.get()
@@ -287,6 +306,8 @@ class Pelamar:
         self.__jenis_kelamin = self.__jenis_kelamin.get()
         self.__pendidikan_terakhir = self.__pendidikan_terakhir.get()
         self.__lama_pengalaman_kerja = self.__lama_pengalaman_kerja.get()
+
+    def get_data(self):
 
         # data jawaban pekerjaan
         for i in range(0, len(self.__data[2])):
@@ -485,10 +506,12 @@ class Evaluate(Utility):
 class Admin(Utility):
 
     def __init__(self):
+
+        # atribute lowongan kerja
         self.__nama_pekerjaan = ""
         self.__deskripsi_pekerjaan = ""
-        self.__status_pekerjaan = ""
-        self.__kategori_pekerjaan = ""
+        self.__status_pekerjaan = "Tetap / Intern"
+        self.__kategori_pekerjaan = "1 : IT   2 : Bisnis   3 : ETC"
         self.__nilai_lulus = ""
         self.__pertanyaan_kerja_1 = ""
         self.__pertanyaan_kerja_2 = ""
@@ -501,24 +524,34 @@ class Admin(Utility):
         self.__prioritas_pertanyaan_kerja_4 = IntVar()
         self.__prioritas_pertanyaan_kerja_5 = IntVar()
 
+        # atribut no pekerjaan yang di input user untuk modify atau delete
+        self.__no_pekerjaan_input_from_user = int()
+        self.__id_pekerjaan_input_from_user = int()
+
     # lowongan kerja panel
 
     def printlist(self, frame):
 
-        data_lowongan = super().printlist()
+        data_lowongan = super().printlist(frame)
 
-        print(" \t Nilai Kelulusan Pertanyaan Kerja \t Pertanyaan 1 \t Pertanyaan 2 \t Pertanyaan 3", end="")
-        print(" \t Kategori Pekerjaan \t Pertanyaan 4 \t Pertanyaan 5")
+        kategori_pekerjaan = Label(frame, text="Kategori Pekerjaan", font=("Helvetica", 10))
+        nilai_kelulusan = Label(frame, text="Nilai Kelulusan", font=("Helvetica", 10))
 
+        kategori_pekerjaan.grid(row=0, column=4, padx=(0, 20))
+        nilai_kelulusan.grid(row=0, column=5, padx=(0, 20))
+
+        counter = 1
         for lowongan in data_lowongan:
+
             for i in range(0, len(lowongan)):
 
-                if i < 5:
-                    print(lowongan[i], "\t\t", end="")
-                else:
-                    print(lowongan[i], "\t", end="")
+                if i == 0:
+                    Label(frame, text=str(counter)).grid(row=counter, column=i, padx=(0, 20))
 
-            print()
+                if 0 < i < 6:
+                    Label(frame, text=lowongan[i]).grid(row=counter, column=i, padx=(0, 20))
+
+            counter += 1
 
     @staticmethod
     def __check_priority_question(pertanyaan, check):
@@ -543,10 +576,16 @@ class Admin(Utility):
 
         Label(frame, text="Status Pekerjaan").grid(row=3, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
         self.__status_pekerjaan = Entry(frame, width=40)
+        self.__status_pekerjaan.insert(0, "Tetap / Intern")
+        self.__status_pekerjaan.bind("<Button-1>",
+                                     lambda event: window.clear_entry_status_once(self.__status_pekerjaan))
         self.__status_pekerjaan.grid(row=3, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
         Label(frame, text="Kategori Pekerjaan").grid(row=4, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
         self.__kategori_pekerjaan = Entry(frame, width=40)
+        self.__kategori_pekerjaan.insert(0, "1 : IT   2 : Bisnis   3 : ETC")
+        self.__kategori_pekerjaan.bind("<Button-1>",
+                                       lambda event: window.clear_entry_kategori_once(self.__kategori_pekerjaan))
         self.__kategori_pekerjaan.grid(row=4, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
         Label(frame, text="Nilai Lulus Pekerjaan").grid(row=5, column=0, sticky=W, padx=(20, 10), pady=(0, 20))
@@ -625,8 +664,8 @@ class Admin(Utility):
         # clear semua data attribute di object setelah input data lowongan kerja ke db berhasil
         self.__nama_pekerjaan = ""
         self.__deskripsi_pekerjaan = ""
-        self.__status_pekerjaan = ""
-        self.__kategori_pekerjaan = ""
+        self.__status_pekerjaan = "Tetap / Intern"
+        self.__kategori_pekerjaan = "1 : IT   2 : Bisnis   3 : ETC"
         self.__nilai_lulus = ""
         self.__pertanyaan_kerja_1 = ""
         self.__pertanyaan_kerja_2 = ""
@@ -645,53 +684,251 @@ class Admin(Utility):
 
         window.menu_input_akhir_kerja_admin()
 
-    def __modify_lowongan_pekerjaan(self):
+    def __submit_pilihan_user(self, value):
 
-        id_pekerjaan = input("Masukkan id lowongan pekerjaan yang ingin dimodifikasi : ")
+        temp = ""
+
+        for v in value:
+            if v != ".":
+                temp += v
+            else:
+                break
+
+        self.__no_pekerjaan_input_from_user = int(temp)
+
+    def menu_modify_lowongan_pekerjaan(self, frame_header, frame, frame_footer):
+
+        label_menu_modify_kerja_admin = Label(frame,
+                                              text="Pilih Lowongan Kerja yang ingin di edit")
+        label_menu_modify_kerja_admin.grid(row=50, column=0, columnspan=2, pady=(20, 30), padx=(0, 10))
+
+        data = super().retrievedata("pekerjaan")
+        data_option = list()
+        for i in range(0, len(data)):
+            data_option.append(str(i + 1) + ".   " + data[i][1])
+
+        pilihan_user = StringVar()
+        pilihan_user.set(data_option[0])
+
+        dropdown_data = OptionMenu(frame, pilihan_user, *data_option)
+        dropdown_data.grid(row=50, column=2, columnspan=2, pady=(20, 30), sticky=EW)
+
+        submit_pilihan_pelamar_btn = Button(frame, text="Submit",
+                                            command=lambda: [
+                                                self.__submit_pilihan_user(pilihan_user.get()),
+                                                self.__get_data_modify_lowongan_pekerjaan(),
+                                                window.remove_current_frame(frame_header),
+                                                window.remove_current_frame(frame),
+                                                window.remove_current_frame(frame_footer),
+                                                window.menu_input_modify_kerja_admin()
+                                            ])
+        submit_pilihan_pelamar_btn.grid(row=50, column=4, pady=(20, 30), ipadx=10, ipady=10)
+
+    def __get_data_modify_lowongan_pekerjaan(self):
+
+        data = super(Admin, self).retrievedata("pekerjaan")
+
+        # get id pekerjaan
+        self.__id_pekerjaan_input_from_user = data[(self.__no_pekerjaan_input_from_user-1)][0]
 
         conn = sqlite3.connect("jobs.db")
         c = conn.cursor()
 
-        c.execute("SELECT * FROM pekerjaan WHERE rowid=(?)", id_pekerjaan)
+        c.execute("SELECT rowid, * FROM pekerjaan WHERE rowid=(?)", (str(self.__id_pekerjaan_input_from_user),))
         conn.commit()
 
-        get_data = c.fetchone()
-
-        print("note : jika tidak ingin diubah maka tulis 'pass'")
-
-        list_modify = list()
-
-        list_modify.append(input("Nama pekerjaan : "))
-        list_modify.append(input("Deskripsi pekerjaan : "))
-        list_modify.append(input("Status pekerjaan : "))
-        list_modify.append(input("Kategori pekerjaan : "))
-        list_modify.append(input("Nilai Lulus : "))
-
-        for j in range(0, 5):
-
-            pertanyaan = input('Pertanyaan ' + str(j + 1) + ' : ')
-            if pertanyaan != "pass":
-                list_modify.append(self.__check_priority_question(pertanyaan))
-            else:
-                list_modify.append(pertanyaan)
-
-        for i in range(0, len(list_modify)):
-            if list_modify[i] == "pass":
-                list_modify[i] = get_data[i]
-
-        c.execute(""" UPDATE pekerjaan SET nama_pekerjaan = ?, deskripsi_pekerjaan = ?, status_pekerjaan = ?,
-                        kategori_pekerjaan = ?, nilai_lulus = ?, pertanyaan1 = ?,
-                        pertanyaan2 = ?, pertanyaan3 = ?, pertanyaan4 = ?, pertanyaan5 = ?
-                        WHERE rowid = ?
-            """, (str(list_modify[0]), str(list_modify[1]), str(list_modify[2]), str(list_modify[3]),
-                  str(list_modify[4]), str(list_modify[5]), str(list_modify[6]), str(list_modify[7]),
-                  str(list_modify[8]), str(list_modify[9]), str(id_pekerjaan)))
-
-        conn.commit()
-
-        print("Sukses memodifikasi data")
+        data = c.fetchone()
 
         conn.close()
+
+        # retrieve data pekerjaan from db and save to atribute lowongan kerja
+        self.__nama_pekerjaan = data[1]
+        self.__deskripsi_pekerjaan = data[2]
+        self.__status_pekerjaan = data[3]
+        self.__kategori_pekerjaan = data[4]
+        self.__nilai_lulus = data[5]
+
+        if data[6][0] == "P":
+            self.__pertanyaan_kerja_1 = data[6][1:]
+            self.__prioritas_pertanyaan_kerja_1.set(1)
+        else:
+            self.__pertanyaan_kerja_1 = data[6]
+            self.__prioritas_pertanyaan_kerja_1.set(0)
+
+        if data[7][0] == "P":
+            self.__pertanyaan_kerja_2 = data[7][1:]
+            self.__prioritas_pertanyaan_kerja_2.set(1)
+        else:
+            self.__pertanyaan_kerja_2 = data[7]
+            self.__prioritas_pertanyaan_kerja_2.set(0)
+
+        if data[8][0] == "P":
+            self.__pertanyaan_kerja_3 = data[8][1:]
+            self.__prioritas_pertanyaan_kerja_3.set(1)
+        else:
+            self.__pertanyaan_kerja_3 = data[8]
+            self.__prioritas_pertanyaan_kerja_3.set(0)
+
+        if data[9][0] == "P":
+            self.__pertanyaan_kerja_4 = data[9][1:]
+            self.__prioritas_pertanyaan_kerja_4.set(1)
+        else:
+            self.__pertanyaan_kerja_4 = data[9]
+            self.__prioritas_pertanyaan_kerja_4.set(0)
+
+        if data[10][0] == "P":
+            self.__pertanyaan_kerja_5 = data[10][1:]
+            self.__prioritas_pertanyaan_kerja_5.set(1)
+        else:
+            self.__pertanyaan_kerja_5 = data[10]
+            self.__prioritas_pertanyaan_kerja_5.set(0)
+
+    def input_modify_lowongan_pekerjaan(self, frame_header, frame, frame_footer):
+
+        Label(frame, text="Modifikasi Data Lowongan Pekerjaan").grid(row=0, column=0, columnspan=2, sticky=W,
+                                                                     padx=(20, 0), pady=(0, 10))
+
+        Label(frame, text="Nama Pekerjaan").grid(row=1, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
+        temp_nama_pekerjaan = self.__nama_pekerjaan
+        self.__nama_pekerjaan = Entry(frame, width=40)
+        self.__nama_pekerjaan.insert(0, temp_nama_pekerjaan)
+        self.__nama_pekerjaan.grid(row=1, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
+
+        Label(frame, text="Deskripsi Pekerjaan").grid(row=2, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
+        temp_deskripsi_pekerjaan = self.__deskripsi_pekerjaan
+        self.__deskripsi_pekerjaan = Entry(frame, width=40)
+        self.__deskripsi_pekerjaan.insert(0, temp_deskripsi_pekerjaan)
+        self.__deskripsi_pekerjaan.grid(row=2, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
+
+        Label(frame, text="Status Pekerjaan").grid(row=3, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
+        temp_status_pekerjaan = self.__status_pekerjaan
+        self.__status_pekerjaan = Entry(frame, width=40)
+        self.__status_pekerjaan.insert(0, temp_status_pekerjaan)
+        self.__status_pekerjaan.grid(row=3, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
+
+        Label(frame, text="Kategori Pekerjaan").grid(row=4, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
+        temp_kategori_pekerjaan = self.__kategori_pekerjaan
+        self.__kategori_pekerjaan = Entry(frame, width=40)
+        self.__kategori_pekerjaan.insert(0, temp_kategori_pekerjaan)
+        self.__kategori_pekerjaan.grid(row=4, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
+
+        Label(frame, text="Nilai Lulus Pekerjaan").grid(row=5, column=0, sticky=W, padx=(20, 10), pady=(0, 20))
+        temp_nilai_lulus_pekerjaan = self.__nilai_lulus
+        self.__nilai_lulus = Entry(frame, width=40)
+        self.__nilai_lulus.insert(0, temp_nilai_lulus_pekerjaan)
+        self.__nilai_lulus.grid(row=5, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 20))
+
+        Label(frame, text="Pertanyaan mengenai Pekerjaan").grid(row=6, column=0, columnspan=2, sticky=W, padx=(20, 0))
+        Label(frame, text="Klik tombol prioritas jika pertanyaan tersebut merupakan pertanyaan prioritas").grid(
+            row=7, column=0, columnspan=4, sticky=W, padx=(20, 0), pady=(0, 10))
+
+        Label(frame, text="Pertanyaan 1").grid(row=8, column=0, sticky=W, pady=(0, 10), padx=(20, 10))
+        temp_pertanyaan_kerja_1 = self.__pertanyaan_kerja_1
+        self.__pertanyaan_kerja_1 = Entry(frame, width=40)
+        self.__pertanyaan_kerja_1.insert(0, temp_pertanyaan_kerja_1)
+        self.__pertanyaan_kerja_1.grid(row=8, column=1, columnspan=2, sticky=W + E, pady=(0, 10))
+        Checkbutton(frame, text="Prioritas", variable=self.__prioritas_pertanyaan_kerja_1).grid(row=8, column=3,
+                                                                                                padx=(20, 0),
+                                                                                                pady=(0, 10))
+
+        Label(frame, text="Pertanyaan 2").grid(row=9, column=0, sticky=W, pady=(0, 10), padx=(20, 10))
+        temp_pertanyaan_kerja_2 = self.__pertanyaan_kerja_2
+        self.__pertanyaan_kerja_2 = Entry(frame, width=40)
+        self.__pertanyaan_kerja_2.insert(0, temp_pertanyaan_kerja_2)
+        self.__pertanyaan_kerja_2.grid(row=9, column=1, columnspan=2, sticky=W + E, pady=(0, 10))
+        Checkbutton(frame, text="Prioritas", variable=self.__prioritas_pertanyaan_kerja_2).grid(row=9, column=3,
+                                                                                                padx=(20, 0),
+                                                                                                pady=(0, 10))
+
+        Label(frame, text="Pertanyaan 3").grid(row=10, column=0, sticky=W, pady=(0, 10), padx=(20, 10))
+        temp_pertanyaan_kerja_3 = self.__pertanyaan_kerja_3
+        self.__pertanyaan_kerja_3 = Entry(frame, width=40)
+        self.__pertanyaan_kerja_3.insert(0, temp_pertanyaan_kerja_3)
+        self.__pertanyaan_kerja_3.grid(row=10, column=1, columnspan=2, sticky=W + E, pady=(0, 10))
+        Checkbutton(frame, text="Prioritas", variable=self.__prioritas_pertanyaan_kerja_3).grid(row=10, column=3,
+                                                                                                padx=(20, 0),
+                                                                                                pady=(0, 10))
+
+        Label(frame, text="Pertanyaan 4").grid(row=11, column=0, sticky=W, pady=(0, 10), padx=(20, 10))
+        temp_pertanyaan_kerja_4 = self.__pertanyaan_kerja_4
+        self.__pertanyaan_kerja_4 = Entry(frame, width=40)
+        self.__pertanyaan_kerja_4.insert(0, temp_pertanyaan_kerja_4)
+        self.__pertanyaan_kerja_4.grid(row=11, column=1, columnspan=2, sticky=W + E, pady=(0, 10))
+        Checkbutton(frame, text="Prioritas", variable=self.__prioritas_pertanyaan_kerja_4).grid(row=11, column=3,
+                                                                                                padx=(20, 0),
+                                                                                                pady=(0, 10))
+
+        Label(frame, text="Pertanyaan 5").grid(row=12, column=0, sticky=W, pady=(0, 10), padx=(20, 10))
+        temp_pertanyaan_kerja_5 = self.__pertanyaan_kerja_5
+        self.__pertanyaan_kerja_5 = Entry(frame, width=40)
+        self.__pertanyaan_kerja_5.insert(0, temp_pertanyaan_kerja_5)
+        self.__pertanyaan_kerja_5.grid(row=12, column=1, columnspan=2, sticky=W + E, pady=(0, 10))
+        Checkbutton(frame, text="Prioritas", variable=self.__prioritas_pertanyaan_kerja_5).grid(row=12, column=3,
+                                                                                                padx=(20, 0),
+                                                                                                pady=(0, 10))
+
+        submit_btn = Button(frame, text="Submit",
+                            command=lambda: self.__proses_modify_lowogan_pekerjaan(frame_header, frame, frame_footer))
+        submit_btn.grid(row=13, column=1, columnspan=2, pady=20, sticky=W + E)
+
+    def __proses_modify_lowogan_pekerjaan(self, frame_header, frame, frame_footer):
+
+        list_modify = list()
+        list_modify.append(self.__nama_pekerjaan.get())
+        list_modify.append(self.__deskripsi_pekerjaan.get())
+        list_modify.append(self.__status_pekerjaan.get())
+        list_modify.append(self.__kategori_pekerjaan.get())
+        list_modify.append(self.__nilai_lulus.get())
+        list_modify.append(
+            self.__check_priority_question(self.__pertanyaan_kerja_1.get(), self.__prioritas_pertanyaan_kerja_1.get()))
+        list_modify.append(
+            self.__check_priority_question(self.__pertanyaan_kerja_2.get(), self.__prioritas_pertanyaan_kerja_2.get()))
+        list_modify.append(
+            self.__check_priority_question(self.__pertanyaan_kerja_3.get(), self.__prioritas_pertanyaan_kerja_3.get()))
+        list_modify.append(
+            self.__check_priority_question(self.__pertanyaan_kerja_4.get(), self.__prioritas_pertanyaan_kerja_4.get()))
+        list_modify.append(
+            self.__check_priority_question(self.__pertanyaan_kerja_5.get(), self.__prioritas_pertanyaan_kerja_5.get()))
+
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
+
+        c.execute(""" UPDATE pekerjaan SET nama_pekerjaan = ?, deskripsi_pekerjaan = ?, status_pekerjaan = ?,
+                                kategori_pekerjaan = ?, nilai_lulus = ?, pertanyaan1 = ?,
+                                pertanyaan2 = ?, pertanyaan3 = ?, pertanyaan4 = ?, pertanyaan5 = ?
+                                WHERE rowid = ?
+                    """, (str(list_modify[0]), str(list_modify[1]), str(list_modify[2]), str(list_modify[3]),
+                          str(list_modify[4]), str(list_modify[5]), str(list_modify[6]), str(list_modify[7]),
+                          str(list_modify[8]), str(list_modify[9]), str(self.__id_pekerjaan_input_from_user)))
+
+        conn.commit()
+
+        conn.close()
+
+        # clear semua data attribute di object setelah input data lowongan kerja ke db berhasil
+        self.__nama_pekerjaan = ""
+        self.__deskripsi_pekerjaan = ""
+        self.__status_pekerjaan = "Tetap / Intern"
+        self.__kategori_pekerjaan = "1 : IT   2 : Bisnis   3 : ETC"
+        self.__nilai_lulus = ""
+        self.__pertanyaan_kerja_1 = ""
+        self.__pertanyaan_kerja_2 = ""
+        self.__pertanyaan_kerja_3 = ""
+        self.__pertanyaan_kerja_4 = ""
+        self.__pertanyaan_kerja_5 = ""
+        self.__prioritas_pertanyaan_kerja_1 = IntVar()
+        self.__prioritas_pertanyaan_kerja_2 = IntVar()
+        self.__prioritas_pertanyaan_kerja_3 = IntVar()
+        self.__prioritas_pertanyaan_kerja_4 = IntVar()
+        self.__prioritas_pertanyaan_kerja_5 = IntVar()
+        self.__no_pekerjaan_input_from_user = int()
+        self.__id_pekerjaan_input_from_user = int()
+
+        window.remove_current_frame(frame_header)
+        window.remove_current_frame(frame)
+        window.remove_current_frame(frame_footer)
+
+        window.menu_input_modify_akhir_kerja_admin()
 
     @staticmethod
     def __delete_lowongan_pekerjaan():
@@ -917,6 +1154,13 @@ class Window:
         self.__menu_pelamar = MenuPelamar()
         self.__admin = Admin()
 
+        # counter for clearing entry once
+        self.__clear_entry_jenis_kelamin_counter = 1
+        self.__clear_entry_pendidikan_terakhir_counter = 1
+        self.__clear_entry_pengalaman_kerja_counter = 1
+        self.__clear_entry_status_counter = 1
+        self.__clear_entry_kategori_counter = 1
+
         # frame menu utama
         self.menu_utama_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_utama_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
@@ -936,7 +1180,7 @@ class Window:
 
         # frame menu isi pertanyaan pelamar kerja
         self.menu_isi_pertanyaan_pelamar_kerja_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
-        self.menu_isi_pertanyaan_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        # self.menu_isi_pertanyaan_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_isi_pertanyaan_pelamar_kerja_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu proses pelamar kerja
@@ -980,13 +1224,53 @@ class Window:
         self.menu_input_akhir_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_input_akhir_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
+        # frame menu modify lowongan kerja admin
+        self.menu_modify_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_modify_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_modify_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu input modify lowongan kerja admin
+        self.menu_input_modify_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_modify_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_modify_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu input modify akhir lowongan kerja admin
+        self.menu_input_modify_akhir_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_modify_akhir_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_modify_akhir_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
     @staticmethod
     def remove_current_frame(current_frame):
         current_frame.grid_remove()
 
     @staticmethod
-    def clear_entry(entry):
-        entry.delete(0, END)
+    def destroy_current_frame(current_frame):
+        current_frame.destroy()
+
+    def clear_entry_jenis_kelamin_once(self, entry):
+        if self.__clear_entry_jenis_kelamin_counter == 1:
+            entry.delete(0, END)
+            self.__clear_entry_jenis_kelamin_counter -= 1
+
+    def clear_entry_pendidikan_terakhir_once(self, entry):
+        if self.__clear_entry_pendidikan_terakhir_counter == 1:
+            entry.delete(0, END)
+            self.__clear_entry_pendidikan_terakhir_counter -= 1
+
+    def clear_entry_pengalaman_kerja_once(self, entry):
+        if self.__clear_entry_pengalaman_kerja_counter == 1:
+            entry.delete(0, END)
+            self.__clear_entry_pengalaman_kerja_counter -= 1
+
+    def clear_entry_status_once(self, entry):
+        if self.__clear_entry_status_counter == 1:
+            entry.delete(0, END)
+            self.__clear_entry_status_counter -= 1
+
+    def clear_entry_kategori_once(self, entry):
+        if self.__clear_entry_kategori_counter == 1:
+            entry.delete(0, END)
+            self.__clear_entry_kategori_counter -= 1
 
     def header(self, frame):
         # program name label
@@ -1079,13 +1363,13 @@ class Window:
                                             self.menu_utama()])
         self.footer(self.menu_utama_pelamar_kerja_footer_frame)
 
-    def menu_isi_data_diri_pelamar_kerja(self, pelamar):
-        self.program_geometry = "550x450+525+150"
+    def menu_isi_data_diri_pelamar_kerja(self, pelamar, frame):
+        self.program_geometry = "590x450+500+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_isi_data_diri_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
                                                                 padx=(25, 0))
-        self.menu_isi_data_diri_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_isi_data_diri_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
                                                                 padx=(25, 0))
 
@@ -1093,15 +1377,16 @@ class Window:
         self.header(self.menu_isi_data_diri_pelamar_kerja_header_frame)
 
         # container section
-        pelamar.isi_data_diri(self.menu_isi_data_diri_pelamar_kerja_frame)
+        pelamar.isi_data_diri(frame)
 
-        submit_btn = Button(self.menu_isi_data_diri_pelamar_kerja_frame, text="Submit",
+        submit_btn = Button(frame, text="Submit",
                             command=lambda: [
+                                pelamar.get_data_diri(),
                                 self.remove_current_frame(self.menu_isi_data_diri_pelamar_kerja_header_frame),
-                                self.remove_current_frame(self.menu_isi_data_diri_pelamar_kerja_frame),
-                                self.remove_current_frame(
-                                    self.menu_isi_data_diri_pelamar_kerja_footer_frame),
-                                self.menu_isi_pertanyaan_pelamar_kerja(pelamar)])
+                                self.destroy_current_frame(frame),
+                                self.remove_current_frame(self.menu_isi_data_diri_pelamar_kerja_footer_frame),
+                                self.menu_isi_pertanyaan_pelamar_kerja(pelamar, LabelFrame(self.root, bd=0,
+                                                                                           highlightthickness=0))])
         submit_btn.grid(row=7, column=2, pady=(20, 40), ipadx=10, sticky=W + E)
 
         # footer section
@@ -1112,7 +1397,7 @@ class Window:
                                              command=lambda: [
                                                  self.remove_current_frame(
                                                      self.menu_isi_data_diri_pelamar_kerja_header_frame),
-                                                 self.remove_current_frame(self.menu_isi_data_diri_pelamar_kerja_frame),
+                                                 self.destroy_current_frame(frame),
                                                  self.remove_current_frame(
                                                      self.menu_isi_data_diri_pelamar_kerja_footer_frame),
                                                  self.menu_utama_pelamar_kerja()])
@@ -1121,20 +1406,19 @@ class Window:
                                         command=lambda: [
                                             self.remove_current_frame(
                                                 self.menu_isi_data_diri_pelamar_kerja_header_frame),
-                                            self.remove_current_frame(
-                                                self.menu_isi_data_diri_pelamar_kerja_frame),
+                                            self.destroy_current_frame(frame),
                                             self.remove_current_frame(
                                                 self.menu_isi_data_diri_pelamar_kerja_footer_frame),
                                             self.menu_utama()])
         self.footer(self.menu_isi_data_diri_pelamar_kerja_footer_frame)
 
-    def menu_isi_pertanyaan_pelamar_kerja(self, pelamar):
+    def menu_isi_pertanyaan_pelamar_kerja(self, pelamar, frame):
         self.program_geometry = "900x710+300+50"
         self.root.geometry(self.program_geometry)
 
         self.menu_isi_pertanyaan_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
                                                                  padx=(25, 0))
-        self.menu_isi_pertanyaan_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_isi_pertanyaan_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3,
                                                                  sticky="WE", padx=(25, 0))
 
@@ -1142,14 +1426,13 @@ class Window:
         self.header(self.menu_isi_pertanyaan_pelamar_kerja_header_frame)
 
         # container section
-        pelamar.isi_data_pertanyaan(self.menu_isi_pertanyaan_pelamar_kerja_frame)
+        pelamar.isi_data_pertanyaan(frame)
 
-        submit_btn = Button(self.menu_isi_pertanyaan_pelamar_kerja_frame, text="Submit", width=20,
+        submit_btn = Button(frame, text="Submit", width=20,
                             command=lambda: [
                                 self.remove_current_frame(self.menu_isi_pertanyaan_pelamar_kerja_header_frame),
-                                self.remove_current_frame(self.menu_isi_pertanyaan_pelamar_kerja_frame),
-                                self.remove_current_frame(
-                                    self.menu_isi_pertanyaan_pelamar_kerja_footer_frame),
+                                self.destroy_current_frame(frame),
+                                self.remove_current_frame(self.menu_isi_pertanyaan_pelamar_kerja_footer_frame),
                                 self.menu_proses_pelamar_kerja(pelamar)])
         submit_btn.grid(row=80, column=0, columnspan=3, pady=(20, 20), ipadx=10, sticky=E)
 
@@ -1161,18 +1444,19 @@ class Window:
                                              command=lambda: [
                                                  self.remove_current_frame(
                                                      self.menu_isi_pertanyaan_pelamar_kerja_header_frame),
-                                                 self.remove_current_frame(
-                                                     self.menu_isi_pertanyaan_pelamar_kerja_frame),
+                                                 self.destroy_current_frame(frame),
                                                  self.remove_current_frame(
                                                      self.menu_isi_pertanyaan_pelamar_kerja_footer_frame),
-                                                 self.menu_isi_data_diri_pelamar_kerja(pelamar)])
+                                                 self.menu_isi_data_diri_pelamar_kerja(pelamar,
+                                                                                       LabelFrame(self.root, bd=0,
+                                                                                                  highlightthickness=0))
+                                             ])
         self.menu_utama_button = Button(self.menu_isi_pertanyaan_pelamar_kerja_footer_frame, text="Menu Utama",
                                         state=ACTIVE,
                                         command=lambda: [
                                             self.remove_current_frame(
                                                 self.menu_isi_pertanyaan_pelamar_kerja_header_frame),
-                                            self.remove_current_frame(
-                                                self.menu_isi_pertanyaan_pelamar_kerja_frame),
+                                            self.destroy_current_frame(frame),
                                             self.remove_current_frame(
                                                 self.menu_isi_pertanyaan_pelamar_kerja_footer_frame),
                                             self.menu_utama()])
@@ -1361,7 +1645,7 @@ class Window:
                                                       self.remove_current_frame(self.menu_utama_admin_frame),
                                                       self.remove_current_frame(self.menu_utama_admin_footer_frame)])
 
-        btn_panel_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
+        btn_panel_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 50), ipadx=25, ipady=25)
         btn_panel_psikologi.grid(row=0, column=1, pady=(35, 50), ipadx=30, ipady=25)
 
         # footer section
@@ -1369,7 +1653,7 @@ class Window:
                                      font=("Helvetica", 10))
         self.menu_sebelumnya_button = Button(self.menu_utama_admin_footer_frame, text="Menu Sebelumnya",
                                              state=DISABLED)
-        self.menu_utama_button = Button(self.menu_utama_admin_footer_frame, text="Menu Utama",
+        self.menu_utama_button = Button(self.menu_utama_admin_footer_frame, text="Logout",
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_utama_admin_header_frame),
                                             self.remove_current_frame(self.menu_utama_admin_frame),
@@ -1413,7 +1697,8 @@ class Window:
                                            command=lambda: [
                                                self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
                                                self.remove_current_frame(self.menu_panel_kerja_admin_frame),
-                                               self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame)])
+                                               self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
+                                               self.menu_modify_kerja_admin()])
 
         btn_hapus_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="Hapus Lowongan Kerja",
                                           command=lambda: [
@@ -1421,8 +1706,8 @@ class Window:
                                               self.remove_current_frame(self.menu_panel_kerja_admin_frame),
                                               self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame)])
 
-        btn_list_lowongan_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25)
-        btn_list_pelamar_kerja.grid(row=0, column=2, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25, sticky=E)
+        btn_list_lowongan_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25, sticky=W)
+        btn_list_pelamar_kerja.grid(row=0, column=2, padx=(15, 50), pady=(35, 20), ipadx=30, ipady=25, sticky=E)
         btn_input_lowongan_kerja.grid(row=1, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
         btn_modify_lowongan_kerja.grid(row=1, column=1, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
         btn_hapus_lowongan_kerja.grid(row=1, column=2, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
@@ -1436,7 +1721,7 @@ class Window:
                                                  self.remove_current_frame(self.menu_panel_kerja_admin_frame),
                                                  self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
                                                  self.menu_utama_admin()])
-        self.menu_utama_button = Button(self.menu_panel_kerja_admin_footer_frame, text="Menu Utama",
+        self.menu_utama_button = Button(self.menu_panel_kerja_admin_footer_frame, text="Logout",
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
                                             self.remove_current_frame(self.menu_panel_kerja_admin_frame),
@@ -1469,7 +1754,7 @@ class Window:
                                                  self.remove_current_frame(self.menu_input_kerja_admin_frame),
                                                  self.remove_current_frame(self.menu_input_kerja_admin_footer_frame),
                                                  self.menu_panel_kerja_admin()])
-        self.menu_utama_button = Button(self.menu_input_kerja_admin_footer_frame, text="Menu Utama",
+        self.menu_utama_button = Button(self.menu_input_kerja_admin_footer_frame, text="Logout",
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_input_kerja_admin_header_frame),
                                             self.remove_current_frame(self.menu_input_kerja_admin_frame),
@@ -1494,7 +1779,7 @@ class Window:
         sukses_image.grid(row=0, rowspan=2, column=0, columnspan=3, pady=(10, 10))
 
         Label(self.menu_input_akhir_kerja_admin_frame,
-              text="Sukses menambahkan lowongan pekerjaan, silahkan kembali ke menu admin atau menu utama",
+              text="Sukses menambahkan lowongan pekerjaan, silahkan kembali ke menu admin atau logout",
               font=("Helvetica", 10, "bold")).grid(row=2, column=0, columnspan=3, pady=(10, 10))
 
         # footer section
@@ -1509,7 +1794,7 @@ class Window:
                                                      self.menu_input_akhir_kerja_admin_footer_frame),
                                                  self.menu_utama_admin()
                                              ])
-        self.menu_utama_button = Button(self.menu_input_akhir_kerja_admin_footer_frame, text="Menu Utama", state=ACTIVE,
+        self.menu_utama_button = Button(self.menu_input_akhir_kerja_admin_footer_frame, text="Logout", state=ACTIVE,
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_input_akhir_kerja_admin_header_frame),
                                             self.remove_current_frame(self.menu_input_akhir_kerja_admin_frame),
@@ -1517,6 +1802,128 @@ class Window:
                                             self.menu_utama()
                                         ])
         self.footer(self.menu_input_akhir_kerja_admin_footer_frame)
+
+    def menu_modify_kerja_admin(self):
+        self.program_geometry = "800x450+340+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_modify_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        self.menu_modify_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_modify_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_modify_kerja_admin_header_frame)
+
+        # container section
+        self.__admin.printlist(self.menu_modify_kerja_admin_frame)
+        self.__admin.menu_modify_lowongan_pekerjaan(self.menu_modify_kerja_admin_header_frame,
+                                                    self.menu_modify_kerja_admin_frame,
+                                                    self.menu_modify_kerja_admin_footer_frame)
+
+        # footer section
+        self.date_time_label = Label(self.menu_modify_kerja_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_modify_kerja_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_modify_kerja_admin_header_frame),
+                                                 self.remove_current_frame(self.menu_modify_kerja_admin_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_modify_kerja_admin_footer_frame),
+                                                 self.menu_panel_kerja_admin()
+                                             ])
+        self.menu_utama_button = Button(self.menu_modify_kerja_admin_footer_frame, text="Logout", state=ACTIVE,
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_modify_kerja_admin_header_frame),
+                                            self.remove_current_frame(self.menu_modify_kerja_admin_frame),
+                                            self.remove_current_frame(self.menu_modify_kerja_admin_footer_frame),
+                                            self.menu_utama()
+                                        ])
+        self.footer(self.menu_modify_kerja_admin_footer_frame)
+
+    def menu_input_modify_kerja_admin(self):
+        self.program_geometry = "600x650+450+50"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_input_modify_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        self.menu_input_modify_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_input_modify_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_input_modify_kerja_admin_header_frame)
+
+        # container section
+        self.__admin.input_modify_lowongan_pekerjaan(self.menu_input_modify_kerja_admin_header_frame,
+                                                     self.menu_input_modify_kerja_admin_frame,
+                                                     self.menu_input_modify_kerja_admin_footer_frame)
+
+        # footer section
+        self.date_time_label = Label(self.menu_input_modify_kerja_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_input_modify_kerja_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_input_modify_kerja_admin_header_frame),
+                                                 self.remove_current_frame(self.menu_input_modify_kerja_admin_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_input_modify_kerja_admin_footer_frame),
+                                                 self.menu_modify_kerja_admin()
+                                             ])
+        self.menu_utama_button = Button(self.menu_input_modify_kerja_admin_footer_frame, text="Logout",
+                                        state=ACTIVE,
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_input_modify_kerja_admin_header_frame),
+                                            self.remove_current_frame(self.menu_input_modify_kerja_admin_frame),
+                                            self.remove_current_frame(self.menu_input_modify_kerja_admin_footer_frame),
+                                            self.menu_utama()
+                                        ])
+        self.footer(self.menu_input_modify_kerja_admin_footer_frame)
+
+    def menu_input_modify_akhir_kerja_admin(self):
+        self.program_geometry = "670x350+430+200"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_input_modify_akhir_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
+                                                                   sticky="WE", padx=(25, 0))
+        self.menu_input_modify_akhir_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_input_modify_akhir_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
+                                                                   padx=(25, 0))
+
+        # header section
+        self.header(self.menu_input_modify_akhir_kerja_admin_header_frame)
+
+        # container section
+        sukses_image = Label(self.menu_input_modify_akhir_kerja_admin_frame, image=self.__sukses_image)
+        sukses_image.grid(row=0, rowspan=2, column=0, columnspan=3, pady=(10, 10))
+
+        Label(self.menu_input_modify_akhir_kerja_admin_frame,
+              text="Sukses mengubah lowongan pekerjaan, silahkan kembali ke menu admin atau logout",
+              font=("Helvetica", 10, "bold")).grid(row=2, column=0, columnspan=3, pady=(10, 10))
+
+        # footer section
+        self.date_time_label = Label(self.menu_input_modify_akhir_kerja_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_input_modify_akhir_kerja_admin_footer_frame, text="Menu Admin",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_input_modify_akhir_kerja_admin_header_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_input_modify_akhir_kerja_admin_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_input_modify_akhir_kerja_admin_footer_frame),
+                                                 self.menu_utama_admin()
+                                             ])
+        self.menu_utama_button = Button(self.menu_input_modify_akhir_kerja_admin_footer_frame, text="Logout",
+                                        state=ACTIVE,
+                                        command=lambda: [
+                                            self.remove_current_frame(
+                                                self.menu_input_modify_akhir_kerja_admin_header_frame),
+                                            self.remove_current_frame(self.menu_input_modify_akhir_kerja_admin_frame),
+                                            self.remove_current_frame(
+                                                self.menu_input_modify_akhir_kerja_admin_footer_frame),
+                                            self.menu_utama()
+                                        ])
+        self.footer(self.menu_input_modify_akhir_kerja_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
