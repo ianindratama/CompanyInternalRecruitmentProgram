@@ -131,7 +131,7 @@ class MenuPelamar(Utility):
         submit_pilihan_pelamar_btn = Button(frame, text="Submit",
                                             command=lambda: [self.__submit_pilihan_user(pilihan_user.get()),
                                                              window.remove_current_frame(header_frame),
-                                                             window.remove_current_frame(frame),
+                                                             window.destroy_current_frame(frame),
                                                              window.remove_current_frame(footer_frame),
                                                              window.menu_isi_data_diri_pelamar_kerja(
                                                                  Pelamar(self.get_all_soal()),
@@ -533,7 +533,6 @@ class Admin(Utility):
     def printlist(self, frame):
 
         data_lowongan = super().printlist(frame)
-        print(data_lowongan)
 
         kategori_pekerjaan = Label(frame, text="Kategori Pekerjaan", font=("Helvetica", 10))
         nilai_kelulusan = Label(frame, text="Nilai Kelulusan", font=("Helvetica", 10))
@@ -543,7 +542,6 @@ class Admin(Utility):
 
         counter = 1
         for lowongan in data_lowongan:
-            print(lowongan)
             for i in range(0, len(lowongan)):
 
                 if i == 0:
@@ -719,7 +717,7 @@ class Admin(Utility):
                                                 self.__submit_pilihan_user(pilihan_user.get()),
                                                 self.__get_data_modify_lowongan_pekerjaan(),
                                                 window.remove_current_frame(frame_header),
-                                                window.remove_current_frame(frame),
+                                                window.destroy_current_frame(frame),
                                                 window.remove_current_frame(frame_footer),
                                                 window.menu_input_modify_kerja_admin()
                                             ])
@@ -952,7 +950,7 @@ class Admin(Utility):
                                             command=lambda: [
                                                 self.__submit_pilihan_user(pilihan_user.get()),
                                                 window.remove_current_frame(frame_header),
-                                                window.remove_current_frame(frame),
+                                                window.destroy_current_frame(frame),
                                                 window.remove_current_frame(frame_footer),
                                                 self.__delete_lowongan_pekerjaan(),
                                                 window.menu_delete_akhir_kerja_admin()
@@ -1204,7 +1202,6 @@ class Window:
 
         # frame menu pelamar kerja
         self.menu_utama_pelamar_kerja_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
-        self.menu_utama_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_utama_pelamar_kerja_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu isi data diri pelamar kerja
@@ -1258,7 +1255,6 @@ class Window:
 
         # frame menu modify lowongan kerja admin
         self.menu_modify_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
-        self.menu_modify_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_modify_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu input modify lowongan kerja admin
@@ -1273,7 +1269,6 @@ class Window:
 
         # frame menu delete lowongan kerja admin
         self.menu_delete_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
-        self.menu_delete_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_delete_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu akhir delete lowongan kerja admin
@@ -1353,7 +1348,8 @@ class Window:
                                    command=lambda: [self.remove_current_frame(self.menu_utama_header_frame),
                                                     self.remove_current_frame(self.menu_utama_frame),
                                                     self.remove_current_frame(self.menu_utama_footer_frame),
-                                                    self.menu_utama_pelamar_kerja()])
+                                                    self.menu_utama_pelamar_kerja(
+                                                        LabelFrame(self.root, bd=0, highlightthickness=0))])
 
         btn_admin = Button(self.menu_utama_frame, text="Admin",
                            command=lambda: [self.remove_current_frame(self.menu_utama_header_frame),
@@ -1370,20 +1366,20 @@ class Window:
         self.menu_utama_button = Button(self.menu_utama_footer_frame, text="Menu Utama", state=DISABLED)
         self.footer(self.menu_utama_footer_frame)
 
-    def menu_utama_pelamar_kerja(self):
+    def menu_utama_pelamar_kerja(self, frame):
         self.program_geometry = "550x300+525+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_utama_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
                                                         padx=(25, 0))
-        self.menu_utama_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_utama_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
         # header section
         self.header(self.menu_utama_pelamar_kerja_header_frame)
 
         # container section
-        self.__menu_pelamar.menu_utama(self.menu_utama_pelamar_kerja_header_frame, self.menu_utama_pelamar_kerja_frame,
+        self.__menu_pelamar.menu_utama(self.menu_utama_pelamar_kerja_header_frame, frame,
                                        self.menu_utama_pelamar_kerja_footer_frame)
 
         # footer section
@@ -1393,13 +1389,13 @@ class Window:
                                              state=ACTIVE,
                                              command=lambda: [
                                                  self.remove_current_frame(self.menu_utama_pelamar_kerja_header_frame),
-                                                 self.remove_current_frame(self.menu_utama_pelamar_kerja_frame),
+                                                 self.destroy_current_frame(frame),
                                                  self.remove_current_frame(self.menu_utama_pelamar_kerja_footer_frame),
                                                  self.menu_utama()])
         self.menu_utama_button = Button(self.menu_utama_pelamar_kerja_footer_frame, text="Menu Utama", state=ACTIVE,
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_utama_pelamar_kerja_header_frame),
-                                            self.remove_current_frame(self.menu_utama_pelamar_kerja_frame),
+                                            self.destroy_current_frame(frame),
                                             self.remove_current_frame(
                                                 self.menu_utama_pelamar_kerja_footer_frame),
                                             self.menu_utama()])
@@ -1442,7 +1438,8 @@ class Window:
                                                  self.destroy_current_frame(frame),
                                                  self.remove_current_frame(
                                                      self.menu_isi_data_diri_pelamar_kerja_footer_frame),
-                                                 self.menu_utama_pelamar_kerja()])
+                                                 self.menu_utama_pelamar_kerja(
+                                                     LabelFrame(self.root, bd=0, highlightthickness=0))])
         self.menu_utama_button = Button(self.menu_isi_data_diri_pelamar_kerja_footer_frame, text="Menu Utama",
                                         state=ACTIVE,
                                         command=lambda: [
@@ -1740,14 +1737,16 @@ class Window:
                                                self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
                                                self.remove_current_frame(self.menu_panel_kerja_admin_frame),
                                                self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
-                                               self.menu_modify_kerja_admin()])
+                                               self.menu_modify_kerja_admin(
+                                                   LabelFrame(self.root, bd=0, highlightthickness=0))])
 
         btn_hapus_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="Hapus Lowongan Kerja",
                                           command=lambda: [
                                               self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
                                               self.remove_current_frame(self.menu_panel_kerja_admin_frame),
                                               self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
-                                              self.menu_delete_kerja_admin()])
+                                              self.menu_delete_kerja_admin(
+                                                  LabelFrame(self.root, bd=0, highlightthickness=0))])
 
         btn_list_lowongan_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25, sticky=W)
         btn_list_pelamar_kerja.grid(row=0, column=2, padx=(15, 50), pady=(35, 20), ipadx=30, ipady=25, sticky=E)
@@ -1846,21 +1845,21 @@ class Window:
                                         ])
         self.footer(self.menu_input_akhir_kerja_admin_footer_frame)
 
-    def menu_modify_kerja_admin(self):
+    def menu_modify_kerja_admin(self, frame):
         self.program_geometry = "800x450+340+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_modify_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
-        self.menu_modify_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_modify_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
         # header section
         self.header(self.menu_modify_kerja_admin_header_frame)
 
         # container section
-        self.__admin.printlist(self.menu_modify_kerja_admin_frame)
+        self.__admin.printlist(frame)
         self.__admin.menu_modify_lowongan_pekerjaan(self.menu_modify_kerja_admin_header_frame,
-                                                    self.menu_modify_kerja_admin_frame,
+                                                    frame,
                                                     self.menu_modify_kerja_admin_footer_frame)
 
         # footer section
@@ -1870,7 +1869,7 @@ class Window:
                                              command=lambda: [
                                                  self.remove_current_frame(
                                                      self.menu_modify_kerja_admin_header_frame),
-                                                 self.remove_current_frame(self.menu_modify_kerja_admin_frame),
+                                                 self.destroy_current_frame(frame),
                                                  self.remove_current_frame(
                                                      self.menu_modify_kerja_admin_footer_frame),
                                                  self.menu_panel_kerja_admin()
@@ -1878,7 +1877,7 @@ class Window:
         self.menu_utama_button = Button(self.menu_modify_kerja_admin_footer_frame, text="Logout", state=ACTIVE,
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_modify_kerja_admin_header_frame),
-                                            self.remove_current_frame(self.menu_modify_kerja_admin_frame),
+                                            self.destroy_current_frame(frame),
                                             self.remove_current_frame(self.menu_modify_kerja_admin_footer_frame),
                                             self.menu_utama()
                                         ])
@@ -1910,7 +1909,8 @@ class Window:
                                                  self.remove_current_frame(self.menu_input_modify_kerja_admin_frame),
                                                  self.remove_current_frame(
                                                      self.menu_input_modify_kerja_admin_footer_frame),
-                                                 self.menu_modify_kerja_admin()
+                                                 self.menu_modify_kerja_admin(
+                                                     LabelFrame(self.root, bd=0, highlightthickness=0))
                                              ])
         self.menu_utama_button = Button(self.menu_input_modify_kerja_admin_footer_frame, text="Logout",
                                         state=ACTIVE,
@@ -1968,21 +1968,21 @@ class Window:
                                         ])
         self.footer(self.menu_input_modify_akhir_kerja_admin_footer_frame)
 
-    def menu_delete_kerja_admin(self):
+    def menu_delete_kerja_admin(self, frame):
         self.program_geometry = "800x450+340+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_delete_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
-        self.menu_delete_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_delete_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
         # header section
         self.header(self.menu_delete_kerja_admin_header_frame)
 
         # container section
-        self.__admin.printlist(self.menu_delete_kerja_admin_frame)
+        self.__admin.printlist(frame)
         self.__admin.menu_delete_lowongan_pekerjaan(self.menu_delete_kerja_admin_header_frame,
-                                                    self.menu_delete_kerja_admin_frame,
+                                                    frame,
                                                     self.menu_delete_kerja_admin_footer_frame)
 
         # footer section
@@ -1992,7 +1992,7 @@ class Window:
                                              command=lambda: [
                                                  self.remove_current_frame(
                                                      self.menu_delete_kerja_admin_header_frame),
-                                                 self.remove_current_frame(self.menu_delete_kerja_admin_frame),
+                                                 self.destroy_current_frame(frame),
                                                  self.remove_current_frame(
                                                      self.menu_delete_kerja_admin_footer_frame),
                                                  self.menu_panel_kerja_admin()
@@ -2000,7 +2000,7 @@ class Window:
         self.menu_utama_button = Button(self.menu_delete_kerja_admin_footer_frame, text="Logout", state=ACTIVE,
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_delete_kerja_admin_header_frame),
-                                            self.remove_current_frame(self.menu_delete_kerja_admin_frame),
+                                            self.destroy_current_frame(frame),
                                             self.remove_current_frame(self.menu_delete_kerja_admin_footer_frame),
                                             self.menu_utama()
                                         ])
@@ -2057,24 +2057,6 @@ class Window:
 
 
 # menu utama
-
-
-#     elif pil_menu == "2":
-#
-#         admin = Admin()
-#
-#         username = input("Username : ")
-#         password = input("Password : ")
-#
-#         if username == "admin" and password == "admin":
-#             admin.menu_utama()
-#         else:
-#             print("Username / Passowrd anda salah")
-#             print("1. Daftar Kerja\t\t2.Admin\t\t3.Keluar Program")
-#
-
-# menu utama
-
 window = Window()
 window.menu_utama()
 window.keep_program_alive()
