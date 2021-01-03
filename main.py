@@ -601,6 +601,29 @@ class Admin(Utility):
                 Label(frame, text=pelamar[i]).grid(row=counter, column=i+1, padx=(0, 20))
             counter += 1
 
+    def printlist_psikologi(self, frame):
+        data_psikologi = super(Admin, self).retrievedata("test_psikologi")
+
+        Label(frame, text="No", font=("Helvetica", 10)).grid(row=0, column=0, padx=(0, 20))
+        Label(frame, text="Soal", font=("Helvetica", 10)).grid(row=0, column=1, padx=(0, 20))
+        Label(frame, text="Nilai Minimum Kelulusan", font=("Helvetica", 10)).grid(row=0, column=2, padx=(0, 20))
+        Label(frame, text="Nilai Maximum Kelulusan", font=("Helvetica", 10)).grid(row=0, column=3, padx=(0, 20))
+
+        counter = 1
+        for data in data_psikologi:
+            for i in range(0, len(data)):
+
+                if i == 0:
+                    Label(frame, text=str(counter)).grid(row=counter, column=i, padx=(0, 20))
+
+                if 0 < i:
+                    if i == 1:
+                        Label(frame, text=data[i]).grid(row=counter, column=i, padx=(0, 20), sticky=W)
+                    else:
+                        Label(frame, text=data[i]).grid(row=counter, column=i, padx=(0, 20))
+
+            counter += 1
+
     @staticmethod
     def __check_priority_question(pertanyaan, check):
 
@@ -1298,10 +1321,14 @@ class Window:
         self.menu_delete_akhir_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_delete_akhir_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
-        # frame menu panel tes psikologi admin
+        # frame menu panel test psikologi admin
         self.menu_panel_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_panel_psikologi_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_panel_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu list test psikologi admin
+        self.menu_list_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_list_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
     @staticmethod
     def remove_current_frame(current_frame):
@@ -2165,7 +2192,7 @@ class Window:
                                             self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
                                             self.destroy_current_frame(frame),
                                             self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
-                                            self.menu_list_kerja_admin(
+                                            self.menu_list_psikologi_admin(
                                                 LabelFrame(self.root, bd=0, highlightthickness=0))
                                         ])
 
@@ -2223,6 +2250,38 @@ class Window:
                                             self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
                                             self.menu_utama()])
         self.footer(self.menu_panel_psikologi_admin_footer_frame)
+
+    def menu_list_psikologi_admin(self, frame):
+        self.program_geometry = "1040x450+240+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_list_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_list_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_list_psikologi_admin_header_frame)
+
+        # container section
+        self.__admin.printlist_psikologi(frame)
+
+        # footer section
+        self.date_time_label = Label(self.menu_list_psikologi_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_list_psikologi_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_list_psikologi_admin_header_frame),
+                                                 self.destroy_current_frame(frame),
+                                                 self.remove_current_frame(self.menu_list_psikologi_admin_footer_frame),
+                                                 self.menu_panel_psikologi_admin(
+                                                     LabelFrame(self.root, bd=0, highlightthickness=0))])
+        self.menu_utama_button = Button(self.menu_list_psikologi_admin_footer_frame, text="Logout",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_list_psikologi_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_list_psikologi_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_list_psikologi_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
