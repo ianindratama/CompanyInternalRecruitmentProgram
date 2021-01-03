@@ -1012,9 +1012,9 @@ class Admin(Utility):
 
     def menu_delete_lowongan_pekerjaan(self, frame_header, frame, frame_footer):
 
-        label_menu_modify_kerja_admin = Label(frame,
+        label_menu_delete_kerja_admin = Label(frame,
                                               text="Pilih Lowongan Kerja yang ingin di hapus")
-        label_menu_modify_kerja_admin.grid(row=50, column=0, columnspan=2, pady=(20, 30), padx=(0, 10))
+        label_menu_delete_kerja_admin.grid(row=50, column=0, columnspan=2, pady=(20, 30), padx=(0, 10))
 
         data = super().retrievedata("pekerjaan")
         data_option = list()
@@ -1027,16 +1027,16 @@ class Admin(Utility):
         dropdown_data = OptionMenu(frame, pilihan_user, *data_option)
         dropdown_data.grid(row=50, column=2, columnspan=2, pady=(20, 30), sticky=EW)
 
-        submit_pilihan_pelamar_btn = Button(frame, text="Submit",
-                                            command=lambda: [
-                                                self.__submit_pekerjaan_pilihan_user(pilihan_user.get()),
-                                                self.__delete_lowongan_pekerjaan(),
-                                                window.remove_current_frame(frame_header),
-                                                window.destroy_current_frame(frame),
-                                                window.remove_current_frame(frame_footer),
-                                                window.menu_delete_akhir_kerja_admin()
-                                            ])
-        submit_pilihan_pelamar_btn.grid(row=50, column=4, pady=(20, 30), ipadx=10, ipady=10)
+        submit_pilihan_btn = Button(frame, text="Submit",
+                                    command=lambda: [
+                                        self.__submit_pekerjaan_pilihan_user(pilihan_user.get()),
+                                        self.__delete_lowongan_pekerjaan(),
+                                        window.remove_current_frame(frame_header),
+                                        window.destroy_current_frame(frame),
+                                        window.remove_current_frame(frame_footer),
+                                        window.menu_delete_akhir_kerja_admin()
+                                    ])
+        submit_pilihan_btn.grid(row=50, column=4, pady=(20, 30), ipadx=10, ipady=10)
 
     def __delete_lowongan_pekerjaan(self):
 
@@ -1236,6 +1236,53 @@ class Admin(Utility):
         window.remove_current_frame(frame_footer)
 
         window.menu_input_modify_akhir_psikologi_admin()
+
+    def menu_delete_test_psikologi(self, frame_header, frame, frame_footer):
+
+        label_menu_delete_psikologi_admin = Label(frame,
+                                                  text="Pilih Soal Psikologi yang ingin di hapus")
+        label_menu_delete_psikologi_admin.grid(row=50, column=0, pady=(20, 30), padx=(0, 10))
+
+        data = super().retrievedata("test_psikologi")
+        data_option = list()
+        for i in range(0, len(data)):
+            data_option.append(str(i + 1) + ".   " + data[i][1])
+
+        pilihan_user = StringVar()
+        pilihan_user.set(data_option[0])
+
+        dropdown_data = OptionMenu(frame, pilihan_user, *data_option)
+        dropdown_data.grid(row=50, column=1, columnspan=2, pady=(20, 30), sticky=EW)
+
+        submit_pilihan_btn = Button(frame, text="Submit",
+                                    command=lambda: [
+                                        self.__submit_psikologi_pilihan_user(pilihan_user.get()),
+                                        self.__delete_test_psikologi(),
+                                        window.remove_current_frame(frame_header),
+                                        window.destroy_current_frame(frame),
+                                        window.remove_current_frame(frame_footer),
+                                        window.menu_delete_akhir_psikologi_admin()
+                                    ])
+        submit_pilihan_btn.grid(row=50, column=3, pady=(20, 30), ipadx=10, ipady=10)
+
+    def __delete_test_psikologi(self):
+
+        data = super(Admin, self).retrievedata("test_psikologi")
+
+        # get id pekerjaan
+        self.__id_psikologi_input_from_user = data[(self.__no_psikologi_input_from_user - 1)][0]
+
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
+
+        c.execute("DELETE FROM test_psikologi WHERE rowid = (?) ", (str(self.__id_psikologi_input_from_user),))
+        conn.commit()
+
+        conn.close()
+
+        # clear attributes
+        self.__no_psikologi_input_from_user = int()
+        self.__id_psikologi_input_from_user = int()
 
     @staticmethod
     def __hapus_test_psikologi():
@@ -1463,6 +1510,15 @@ class Window:
         self.menu_input_modify_akhir_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_input_modify_akhir_psikologi_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_input_modify_akhir_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu delete test psikologi admin
+        self.menu_delete_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_delete_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu akhir delete test psikologi admin
+        self.menu_delete_akhir_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_delete_akhir_psikologi_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_delete_akhir_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
     @staticmethod
     def remove_current_frame(current_frame):
@@ -2355,7 +2411,7 @@ class Window:
                                              self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
                                              self.destroy_current_frame(frame),
                                              self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
-                                             self.menu_delete_kerja_admin(
+                                             self.menu_delete_psikologi_admin(
                                                  LabelFrame(self.root, bd=0, highlightthickness=0))])
 
         btn_list_tes_psikologi.grid(row=0, column=1, padx=(15, 50), pady=(35, 20), ipadx=20, ipady=25, sticky=W + E)
@@ -2630,6 +2686,92 @@ class Window:
                                             self.menu_utama()
                                         ])
         self.footer(self.menu_input_modify_akhir_psikologi_admin_footer_frame)
+
+    def menu_delete_psikologi_admin(self, frame):
+        self.program_geometry = "1240x450+140+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_delete_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_delete_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_delete_psikologi_admin_header_frame)
+
+        # container section
+        self.__admin.printlist_psikologi(frame)
+        self.__admin.menu_delete_test_psikologi(self.menu_delete_psikologi_admin_header_frame,
+                                                frame,
+                                                self.menu_delete_psikologi_admin_footer_frame)
+
+        # footer section
+        self.date_time_label = Label(self.menu_delete_psikologi_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_delete_psikologi_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_delete_psikologi_admin_header_frame),
+                                                 self.destroy_current_frame(frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_delete_psikologi_admin_footer_frame),
+                                                 self.menu_panel_psikologi_admin(
+                                                     LabelFrame(self.root, bd=0, highlightthickness=0))
+                                             ])
+        self.menu_utama_button = Button(self.menu_delete_psikologi_admin_footer_frame, text="Logout", state=ACTIVE,
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_delete_psikologi_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_delete_psikologi_admin_footer_frame),
+                                            self.menu_utama()
+                                        ])
+        self.footer(self.menu_delete_psikologi_admin_footer_frame)
+
+    def menu_delete_akhir_psikologi_admin(self):
+
+        self.program_geometry = "670x350+430+200"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_delete_akhir_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
+                                                                 sticky="WE", padx=(25, 0))
+        self.menu_delete_akhir_psikologi_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_delete_akhir_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
+                                                                 padx=(25, 0))
+
+        # header section
+        self.header(self.menu_delete_akhir_psikologi_admin_header_frame)
+
+        # container section
+        sukses_image = Label(self.menu_delete_akhir_psikologi_admin_frame, image=self.__sukses_image)
+        sukses_image.grid(row=0, rowspan=2, column=0, columnspan=3, pady=(10, 10))
+
+        Label(self.menu_delete_akhir_psikologi_admin_frame,
+              text="Sukses menghapus soal psikologi, silahkan kembali ke menu admin atau logout",
+              font=("Helvetica", 10, "bold")).grid(row=2, column=0, columnspan=3, pady=(10, 10))
+
+        # footer section
+        self.date_time_label = Label(self.menu_delete_akhir_psikologi_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_delete_akhir_psikologi_admin_footer_frame, text="Menu Admin",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_delete_akhir_psikologi_admin_header_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_delete_akhir_psikologi_admin_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_delete_akhir_psikologi_admin_footer_frame),
+                                                 self.menu_utama_admin()
+                                             ])
+        self.menu_utama_button = Button(self.menu_delete_akhir_psikologi_admin_footer_frame, text="Logout",
+                                        state=ACTIVE,
+                                        command=lambda: [
+                                            self.remove_current_frame(
+                                                self.menu_delete_akhir_psikologi_admin_header_frame),
+                                            self.remove_current_frame(self.menu_delete_akhir_psikologi_admin_frame),
+                                            self.remove_current_frame(
+                                                self.menu_delete_akhir_psikologi_admin_footer_frame),
+                                            self.menu_utama()
+                                        ])
+        self.footer(self.menu_delete_akhir_psikologi_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
