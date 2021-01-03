@@ -30,20 +30,28 @@ class Utility:
         conn.close()
         return data
 
+    @staticmethod
+    def retrievedataspecific(identity, id_pekerjaan):
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
+
+        c.execute("SELECT rowid, * FROM " + identity + " WHERE rowid=(?)", (str(id_pekerjaan),))
+        conn.commit()
+
+        data = c.fetchone()
+        data = list(data)
+
+        conn.close()
+        return data
+
     def printlist(self, frame):
 
         data_lowongan = self.retrievedata("pekerjaan")
 
-        no = Label(frame, text="No", font=("Helvetica", 10))
-        nama_pekerjaan = Label(frame, text="Nama Pekerjaan", font=("Helvetica", 10))
-        deskripsi_pekerjaan = Label(frame, text="Deskripsi Pekerjaan",
-                                    font=("Helvetica", 10))
-        status_pekerjaan = Label(frame, text="Status Pekerjaan", font=("Helvetica", 10))
-
-        no.grid(row=0, column=0, padx=(0, 20))
-        nama_pekerjaan.grid(row=0, column=1, padx=(0, 20))
-        deskripsi_pekerjaan.grid(row=0, column=2, padx=(0, 20))
-        status_pekerjaan.grid(row=0, column=3, padx=(0, 20))
+        Label(frame, text="No", font=("Helvetica", 10)).grid(row=0, column=0, padx=(0, 20))
+        Label(frame, text="Nama Pekerjaan", font=("Helvetica", 10)).grid(row=0, column=1, padx=(0, 20))
+        Label(frame, text="Deskripsi Pekerjaan", font=("Helvetica", 10)).grid(row=0, column=2, padx=(0, 20))
+        Label(frame, text="Status Pekerjaan", font=("Helvetica", 10)).grid(row=0, column=3, padx=(0, 20))
 
         return data_lowongan
 
@@ -435,10 +443,11 @@ class Evaluate(Utility):
         c = conn.cursor()
 
         if nilai_kerja >= int(data[1][5]) and counter_kelulusan_psikologi >= 3:
-            c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Lulus", data[0][0]))
+            c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Lulus", data[0][0],))
+
             conn.commit()
         else:
-            c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Tidak Lulus", data[0][0]))
+            c.execute("UPDATE pelamar SET status_kelulusan = ? WHERE rowid = ?", ("Tidak Lulus", data[0][0],))
             conn.commit()
 
         conn.close()
@@ -534,11 +543,8 @@ class Admin(Utility):
 
         data_lowongan = super().printlist(frame)
 
-        kategori_pekerjaan = Label(frame, text="Kategori Pekerjaan", font=("Helvetica", 10))
-        nilai_kelulusan = Label(frame, text="Nilai Kelulusan", font=("Helvetica", 10))
-
-        kategori_pekerjaan.grid(row=0, column=4, padx=(0, 20))
-        nilai_kelulusan.grid(row=0, column=5, padx=(0, 20))
+        Label(frame, text="Kategori Pekerjaan", font=("Helvetica", 10)).grid(row=0, column=4, padx=(0, 20))
+        Label(frame, text="Nilai Kelulusan", font=("Helvetica", 10)).grid(row=0, column=5, padx=(0, 20))
 
         counter = 1
         for lowongan in data_lowongan:
@@ -550,6 +556,35 @@ class Admin(Utility):
                 if 0 < i < 6:
                     Label(frame, text=lowongan[i]).grid(row=counter, column=i, padx=(0, 20))
 
+            counter += 1
+
+    def printlist_pelamar(self, frame):
+        data_pelamar = super(Admin, self).retrievedata("pelamar")
+
+        modified_data_pelamar = list()
+
+        for i in range(0, len(data_pelamar)):
+            data = list()
+            data.append(data_pelamar[i][3])
+            data.append(data_pelamar[i][4])
+            # cari nama pekerjaan berdasarkan id pekerjaan
+            data.append(super(Admin, self).retrievedataspecific("pekerjaan", data_pelamar[i][1])[1])
+            data.append(data_pelamar[i][2])
+            data.append(data_pelamar[i][9])
+            modified_data_pelamar.append(data)
+
+        Label(frame, text="No", font=("Helvetica", 10)).grid(row=0, column=0, padx=(0, 20))
+        Label(frame, text="Nama", font=("Helvetica", 10)).grid(row=0, column=1, padx=(0, 20))
+        Label(frame, text="Email", font=("Helvetica", 10)).grid(row=0, column=2, padx=(0, 20))
+        Label(frame, text="Nama Pekerjaan", font=("Helvetica", 10)).grid(row=0, column=3, padx=(0, 20))
+        Label(frame, text="Status Kelulusan", font=("Helvetica", 10)).grid(row=0, column=4, padx=(0, 20))
+        Label(frame, text="Tanggal Applied", font=("Helvetica", 10)).grid(row=0, column=5, padx=(0, 20))
+
+        counter = 1
+        for pelamar in modified_data_pelamar:
+            Label(frame, text=str(counter)).grid(row=counter, column=0, padx=(0, 20))
+            for i in range(0, len(pelamar)):
+                Label(frame, text=pelamar[i]).grid(row=counter, column=i+1, padx=(0, 20))
             counter += 1
 
     @staticmethod
@@ -949,10 +984,10 @@ class Admin(Utility):
         submit_pilihan_pelamar_btn = Button(frame, text="Submit",
                                             command=lambda: [
                                                 self.__submit_pilihan_user(pilihan_user.get()),
+                                                self.__delete_lowongan_pekerjaan(),
                                                 window.remove_current_frame(frame_header),
                                                 window.destroy_current_frame(frame),
                                                 window.remove_current_frame(frame_footer),
-                                                self.__delete_lowongan_pekerjaan(),
                                                 window.menu_delete_akhir_kerja_admin()
                                             ])
         submit_pilihan_pelamar_btn.grid(row=50, column=4, pady=(20, 30), ipadx=10, ipady=10)
@@ -978,11 +1013,6 @@ class Admin(Utility):
         # clear attributes
         self.__no_pekerjaan_input_from_user = int()
         self.__id_pekerjaan_input_from_user = int()
-
-    def __list_pelamar_kerja(self):
-        data = super(Admin, self).retrievedata("pelamar")
-        for d in data:
-            print(d)
 
     # test psikologi panel
 
@@ -1240,8 +1270,12 @@ class Window:
         self.menu_panel_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu list lowongan kerja admin
+        self.menu_list_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_list_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu list pelamar kerja admin
+        self.menu_list_pelamar_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_list_pelamar_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # frame menu input lowongan kerja admin
         self.menu_input_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
@@ -1717,13 +1751,18 @@ class Window:
                                              self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
                                              self.remove_current_frame(self.menu_panel_kerja_admin_frame),
                                              self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
+                                             self.menu_list_kerja_admin(
+                                                 LabelFrame(self.root, bd=0, highlightthickness=0))
                                              ])
 
         btn_list_pelamar_kerja = Button(self.menu_panel_kerja_admin_frame, text="List Pelamar Kerja",
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_panel_kerja_admin_header_frame),
                                             self.remove_current_frame(self.menu_panel_kerja_admin_frame),
-                                            self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame)])
+                                            self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
+                                            self.menu_list_pelamar_admin(
+                                                LabelFrame(self.root, bd=0, highlightthickness=0))
+                                        ])
 
         btn_input_lowongan_kerja = Button(self.menu_panel_kerja_admin_frame, text="Input Lowongan Kerja",
                                           command=lambda: [
@@ -1748,7 +1787,7 @@ class Window:
                                               self.menu_delete_kerja_admin(
                                                   LabelFrame(self.root, bd=0, highlightthickness=0))])
 
-        btn_list_lowongan_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 20), ipadx=15, ipady=25, sticky=W)
+        btn_list_lowongan_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 20), ipadx=20, ipady=25, sticky=W)
         btn_list_pelamar_kerja.grid(row=0, column=2, padx=(15, 50), pady=(35, 20), ipadx=30, ipady=25, sticky=E)
         btn_input_lowongan_kerja.grid(row=1, column=0, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
         btn_modify_lowongan_kerja.grid(row=1, column=1, padx=(15, 50), pady=(35, 50), ipadx=15, ipady=25)
@@ -1770,6 +1809,68 @@ class Window:
                                             self.remove_current_frame(self.menu_panel_kerja_admin_footer_frame),
                                             self.menu_utama()])
         self.footer(self.menu_panel_kerja_admin_footer_frame)
+
+    def menu_list_kerja_admin(self, frame):
+        self.program_geometry = "800x450+340+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_list_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_list_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_list_kerja_admin_header_frame)
+
+        # container section
+        self.__admin.printlist(frame)
+
+        # footer section
+        self.date_time_label = Label(self.menu_list_kerja_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_list_kerja_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_list_kerja_admin_header_frame),
+                                                 self.destroy_current_frame(frame),
+                                                 self.remove_current_frame(self.menu_list_kerja_admin_footer_frame),
+                                                 self.menu_panel_kerja_admin()])
+        self.menu_utama_button = Button(self.menu_list_kerja_admin_footer_frame, text="Logout",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_list_kerja_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_list_kerja_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_list_kerja_admin_footer_frame)
+
+    def menu_list_pelamar_admin(self, frame):
+        self.program_geometry = "800x450+340+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_list_pelamar_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_list_pelamar_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_list_pelamar_admin_header_frame)
+
+        # container section
+        self.__admin.printlist_pelamar(frame)
+
+        # footer section
+        self.date_time_label = Label(self.menu_list_pelamar_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_list_pelamar_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_list_pelamar_admin_header_frame),
+                                                 self.destroy_current_frame(frame),
+                                                 self.remove_current_frame(self.menu_list_pelamar_admin_footer_frame),
+                                                 self.menu_panel_kerja_admin()])
+        self.menu_utama_button = Button(self.menu_list_pelamar_admin_footer_frame, text="Logout",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_list_pelamar_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_list_pelamar_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_list_pelamar_admin_footer_frame)
 
     def menu_input_kerja_admin(self):
         self.program_geometry = "600x650+450+50"
