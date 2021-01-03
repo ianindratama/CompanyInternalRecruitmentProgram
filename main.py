@@ -55,6 +55,20 @@ class Utility:
 
         return data_lowongan
 
+    @staticmethod
+    def count_soal_psikologi():
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
+
+        c.execute("SELECT rowid, * FROM test_psikologi")
+        conn.commit()
+
+        list_soal = c.fetchall()
+
+        conn.close()
+
+        return len(list_soal)
+
 
 class MenuPelamar(Utility):
 
@@ -1017,32 +1031,6 @@ class Admin(Utility):
     # test psikologi panel
 
     @staticmethod
-    def __count_soal_psikologi():
-        conn = sqlite3.connect("jobs.db")
-        c = conn.cursor()
-
-        c.execute("SELECT rowid, * FROM test_psikologi")
-        conn.commit()
-
-        list_soal = c.fetchall()
-        return len(list_soal)
-
-    @staticmethod
-    def __list_test_psikologi():
-        conn = sqlite3.connect("jobs.db")
-        c = conn.cursor()
-
-        c.execute("SELECT rowid, * FROM test_psikologi")
-        conn.commit()
-
-        list_soal = c.fetchall()
-
-        for soal in list_soal:
-            print(soal)
-
-        conn.close()
-
-    @staticmethod
     def __tambah_test_psikologi(jumlah_soal):
 
         if jumlah_soal < 5:
@@ -1309,6 +1297,11 @@ class Window:
         self.menu_delete_akhir_kerja_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_delete_akhir_kerja_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_delete_akhir_kerja_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu panel tes psikologi admin
+        self.menu_panel_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_panel_psikologi_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_panel_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
     @staticmethod
     def remove_current_frame(current_frame):
@@ -1660,7 +1653,7 @@ class Window:
         username_input = Entry(self.menu_login_admin_frame)
         username_input.grid(row=0, column=1, columnspan=2, pady=(20, 20), sticky=W)
 
-        password_input = Entry(self.menu_login_admin_frame)
+        password_input = Entry(self.menu_login_admin_frame, show="*")
         password_input.grid(row=1, column=1, columnspan=2, pady=(0, 20), sticky=W)
 
         submit_btn = Button(self.menu_login_admin_frame, text="Submit", font=("Helvetica", 10),
@@ -1716,7 +1709,9 @@ class Window:
         btn_panel_psikologi = Button(self.menu_utama_admin_frame, text="Panel Test Psikologi",
                                      command=lambda: [self.remove_current_frame(self.menu_utama_admin_header_frame),
                                                       self.remove_current_frame(self.menu_utama_admin_frame),
-                                                      self.remove_current_frame(self.menu_utama_admin_footer_frame)])
+                                                      self.remove_current_frame(self.menu_utama_admin_footer_frame),
+                                                      self.menu_panel_psikologi_admin(
+                                                          LabelFrame(self.root, bd=0, highlightthickness=0))])
 
         btn_panel_kerja.grid(row=0, column=0, padx=(15, 50), pady=(35, 50), ipadx=25, ipady=25)
         btn_panel_psikologi.grid(row=0, column=1, pady=(35, 50), ipadx=30, ipady=25)
@@ -2152,6 +2147,82 @@ class Window:
                                             self.menu_utama()
                                         ])
         self.footer(self.menu_delete_akhir_kerja_admin_footer_frame)
+
+    def menu_panel_psikologi_admin(self, frame):
+        self.program_geometry = "690x450+405+150"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_panel_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3)
+        frame.grid(row=2, column=0, columnspan=3)
+        self.menu_panel_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3)
+
+        # header section
+        self.header(self.menu_panel_psikologi_admin_header_frame)
+
+        # container section
+        btn_list_tes_psikologi = Button(frame, text="List Test Psikologi",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
+                                            self.menu_list_kerja_admin(
+                                                LabelFrame(self.root, bd=0, highlightthickness=0))
+                                        ])
+
+        btn_input_tes_psikologi = Button(frame, text="Input Test Psikologi",
+                                         command=lambda: [
+                                             self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
+                                             self.destroy_current_frame(frame),
+                                             self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
+                                             self.menu_input_kerja_admin()])
+
+        btn_modify_tes_psikologi = Button(frame, text="Modifikasi Test Psikologi",
+                                          command=lambda: [
+                                              self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
+                                              self.destroy_current_frame(frame),
+                                              self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
+                                              self.menu_modify_kerja_admin(
+                                                  LabelFrame(self.root, bd=0, highlightthickness=0))])
+
+        btn_hapus_tes_psikologi = Button(frame, text="Hapus Test Psikologi",
+                                         command=lambda: [
+                                             self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
+                                             self.destroy_current_frame(frame),
+                                             self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
+                                             self.menu_delete_kerja_admin(
+                                                 LabelFrame(self.root, bd=0, highlightthickness=0))])
+
+        btn_list_tes_psikologi.grid(row=0, column=1, padx=(15, 50), pady=(35, 20), ipadx=20, ipady=25, sticky=W + E)
+        btn_input_tes_psikologi.grid(row=1, column=0, padx=(15, 50), pady=(35, 30), ipadx=15, ipady=25)
+        btn_modify_tes_psikologi.grid(row=1, column=1, padx=(15, 50), pady=(35, 30), ipadx=15, ipady=25)
+        btn_hapus_tes_psikologi.grid(row=1, column=2, padx=(15, 50), pady=(35, 30), ipadx=15, ipady=25)
+
+        # get berapa jumlah soal psikologi
+        jumlah_soal = self.__admin.count_soal_psikologi()
+        if jumlah_soal != 5:
+            Label(frame,
+                  text="Peringatan : Hanya ada {} dari 5 Pertanyaan Test Psikologi! Harap tambahkan {} Pertanyaan !".
+                  format(jumlah_soal, 5 - jumlah_soal), font=("Helvetica", "10", "bold"),
+                  fg="red").grid(row=2, column=0, columnspan=3, pady=(0, 10))
+
+        # footer section
+        self.date_time_label = Label(self.menu_panel_psikologi_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_panel_psikologi_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_panel_psikologi_admin_header_frame),
+                                                 self.destroy_current_frame(frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_panel_psikologi_admin_footer_frame),
+                                                 self.menu_utama_admin()])
+        self.menu_utama_button = Button(self.menu_panel_psikologi_admin_footer_frame, text="Logout",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_panel_psikologi_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
