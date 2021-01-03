@@ -547,9 +547,14 @@ class Admin(Utility):
         self.__prioritas_pertanyaan_kerja_4 = IntVar()
         self.__prioritas_pertanyaan_kerja_5 = IntVar()
 
-        # atribut no pekerjaan yang di input user untuk modify atau delete
+        # atribute no pekerjaan yang di input user untuk modify atau delete
         self.__no_pekerjaan_input_from_user = int()
         self.__id_pekerjaan_input_from_user = int()
+
+        # atribute psikologi
+        self.__soal_psikologi = ""
+        self.__nilai_minimum_psikologi = ""
+        self.__nilai_maximum_psikologi = ""
 
     # lowongan kerja panel
 
@@ -1053,38 +1058,61 @@ class Admin(Utility):
 
     # test psikologi panel
 
-    @staticmethod
-    def __tambah_test_psikologi(jumlah_soal):
+    def tambah_test_psikologi(self, frame_header, frame, frame_footer, jumlah_soal):
+        Label(frame, text="Isi Data Test Psikologi").grid(row=0, column=0, columnspan=2, sticky=W, padx=(20, 0),
+                                                          pady=(0, 10))
+        Label(frame, text="5 : Sangat Setuju | 4 : Cukup Setuju | 3 : Setuju"
+                          " | 2 : Kurang Setuju | 1 : Tidak Setuju", fg="red").grid(row=1, column=0, columnspan=3,
+                                                                                    sticky=W,
+                                                                                    padx=(20, 0), pady=(0, 10))
 
-        if jumlah_soal < 5:
+        Label(frame, text="Soal Psikologi").grid(row=2, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
+        self.__soal_psikologi = Entry(frame, width=40)
+        self.__soal_psikologi.grid(row=2, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
-            n = int(input("Jumlah pertanyaan psikologi yang akan ditambahkan : "))
+        Label(frame, text="Nilai Minimum Psikologi").grid(row=3, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
+        self.__nilai_minimum_psikologi = Entry(frame, width=40)
+        self.__nilai_minimum_psikologi.grid(row=3, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
-            if jumlah_soal + n <= 5:
+        Label(frame, text="Nilai Maximum Psikologi").grid(row=4, column=0, sticky=W, padx=(20, 10), pady=(0, 20))
+        self.__nilai_maximum_psikologi = Entry(frame, width=40)
+        self.__nilai_maximum_psikologi.grid(row=4, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 20))
 
-                for i in range(0, n):
-                    soal = input("Masukkan pertanyaan psikologi : ")
-                    nilai_minimum_kelulusan = input("""Masukkan Nilai Minimum Kelulusan untuk pertanyaan "{}" : """.
-                                                    format(soal))
-                    nilai_maximum_kelulusan = input("""Masukkan Nilai Maximum Kelulusan untuk pertanyaan "{}" : """.
-                                                    format(soal))
-                    tuple_soal = [soal, nilai_minimum_kelulusan, nilai_maximum_kelulusan]
-                    tuple_soal = tuple(tuple_soal)
+        submit_btn = Button(frame, text="Submit",
+                            command=lambda: self.__proses_tambah_test_psikologi(frame_header, frame, frame_footer))
 
-                    conn = sqlite3.connect("jobs.db")
-                    c = conn.cursor()
+        if jumlah_soal == 5:
+            Label(frame, text="""Tidak bisa menambahkan pertanyaan karena\ntelah mencapai limit jumlah pertanyaan""",
+                  fg="red", anchor=W).grid(row=5, rowspan=2, column=0, columnspan=2, sticky=W, padx=(20, 10),
+                                           pady=(5, 20))
+            submit_btn['state'] = DISABLED
 
-                    c.execute("INSERT INTO test_psikologi VALUES (?, ?, ?)", tuple_soal)
-                    conn.commit()
+        submit_btn.grid(row=5, column=2, pady=(10, 20), sticky=W+E)
 
-                    conn.close()
+    def __proses_tambah_test_psikologi(self, frame_header, frame, frame_footer):
+        list_data = list()
+        list_data.append(self.__soal_psikologi.get())
+        list_data.append(self.__nilai_minimum_psikologi.get())
+        list_data.append(self.__nilai_maximum_psikologi.get())
 
-                    print("Berhasil memasukkan data")
-            else:
-                print("Tidak bisa menambahkan {} pertanyaan karena melampaui limit jumlah pertanyaan".format(n))
+        conn = sqlite3.connect("jobs.db")
+        c = conn.cursor()
 
-        else:
-            print("Anda sudah mengisi 5 Pertanyaan Test Psikologi")
+        c.execute("INSERT INTO test_psikologi VALUES (?, ?, ?)", tuple(list_data))
+        conn.commit()
+
+        conn.close()
+
+        # clear semua data attribute di object setelah input data lowongan kerja ke db berhasil
+        self.__soal_psikologi = ""
+        self.__nilai_minimum_psikologi = ""
+        self.__nilai_maximum_psikologi = ""
+
+        window.remove_current_frame(frame_header)
+        window.destroy_current_frame(frame)
+        window.remove_current_frame(frame_footer)
+
+        window.menu_input_akhir_psikologi_admin()
 
     def __modify_test_psikologi(self):
 
@@ -1329,6 +1357,15 @@ class Window:
         # frame menu list test psikologi admin
         self.menu_list_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_list_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu input test psikologi admin
+        self.menu_input_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
+        # frame menu input akhir test psikologi admin
+        self.menu_input_akhir_psikologi_admin_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_akhir_psikologi_admin_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_input_akhir_psikologi_admin_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
     @staticmethod
     def remove_current_frame(current_frame):
@@ -2186,6 +2223,9 @@ class Window:
         # header section
         self.header(self.menu_panel_psikologi_admin_header_frame)
 
+        # get berapa jumlah soal psikologi
+        jumlah_soal = self.__admin.count_soal_psikologi()
+
         # container section
         btn_list_tes_psikologi = Button(frame, text="List Test Psikologi",
                                         command=lambda: [
@@ -2201,7 +2241,9 @@ class Window:
                                              self.remove_current_frame(self.menu_panel_psikologi_admin_header_frame),
                                              self.destroy_current_frame(frame),
                                              self.remove_current_frame(self.menu_panel_psikologi_admin_footer_frame),
-                                             self.menu_input_kerja_admin()])
+                                             self.menu_input_psikologi_admin(jumlah_soal,
+                                                                             LabelFrame(self.root, bd=0,
+                                                                                        highlightthickness=0))])
 
         btn_modify_tes_psikologi = Button(frame, text="Modifikasi Test Psikologi",
                                           command=lambda: [
@@ -2224,8 +2266,6 @@ class Window:
         btn_modify_tes_psikologi.grid(row=1, column=1, padx=(15, 50), pady=(35, 30), ipadx=15, ipady=25)
         btn_hapus_tes_psikologi.grid(row=1, column=2, padx=(15, 50), pady=(35, 30), ipadx=15, ipady=25)
 
-        # get berapa jumlah soal psikologi
-        jumlah_soal = self.__admin.count_soal_psikologi()
         if jumlah_soal != 5:
             Label(frame,
                   text="Peringatan : Hanya ada {} dari 5 Pertanyaan Test Psikologi! Harap tambahkan {} Pertanyaan !".
@@ -2282,6 +2322,85 @@ class Window:
                                             self.remove_current_frame(self.menu_list_psikologi_admin_footer_frame),
                                             self.menu_utama()])
         self.footer(self.menu_list_psikologi_admin_footer_frame)
+
+    def menu_input_psikologi_admin(self, jumlah_soal, frame):
+        self.program_geometry = "600x650+450+50"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_input_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3)
+        frame.grid(row=2, column=0, columnspan=3)
+        self.menu_input_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3)
+
+        # header section
+        self.header(self.menu_input_psikologi_admin_header_frame)
+
+        # container section
+        self.__admin.tambah_test_psikologi(self.menu_input_psikologi_admin_header_frame,
+                                           frame, self.menu_input_psikologi_admin_footer_frame, jumlah_soal)
+
+        # footer section
+        self.date_time_label = Label(self.menu_input_psikologi_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_input_psikologi_admin_footer_frame, text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_input_psikologi_admin_header_frame),
+                                                 self.destroy_current_frame(frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_input_psikologi_admin_footer_frame),
+                                                 self.menu_panel_psikologi_admin(
+                                                     LabelFrame(self.root, bd=0, highlightthickness=0))])
+        self.menu_utama_button = Button(self.menu_input_psikologi_admin_footer_frame, text="Logout",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_input_psikologi_admin_header_frame),
+                                            self.destroy_current_frame(frame),
+                                            self.remove_current_frame(self.menu_input_psikologi_admin_footer_frame),
+                                            self.menu_utama()])
+        self.footer(self.menu_input_psikologi_admin_footer_frame)
+
+    def menu_input_akhir_psikologi_admin(self):
+        self.program_geometry = "670x350+430+200"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_input_akhir_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
+                                                                padx=(25, 0))
+        self.menu_input_akhir_psikologi_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_input_akhir_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
+                                                                padx=(25, 0))
+
+        # header section
+        self.header(self.menu_input_akhir_psikologi_admin_header_frame)
+
+        # container section
+        sukses_image = Label(self.menu_input_akhir_psikologi_admin_frame, image=self.__sukses_image)
+        sukses_image.grid(row=0, rowspan=2, column=0, columnspan=3, pady=(10, 10))
+
+        Label(self.menu_input_akhir_psikologi_admin_frame,
+              text="Sukses menambahkan soal psikologi, silahkan kembali ke menu admin atau logout",
+              font=("Helvetica", 10, "bold")).grid(row=2, column=0, columnspan=3, pady=(10, 10))
+
+        # footer section
+        self.date_time_label = Label(self.menu_input_akhir_psikologi_admin_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_input_akhir_psikologi_admin_footer_frame, text="Menu Admin",
+                                             command=lambda: [
+                                                 self.remove_current_frame(
+                                                     self.menu_input_akhir_psikologi_admin_header_frame),
+                                                 self.remove_current_frame(self.menu_input_akhir_psikologi_admin_frame),
+                                                 self.remove_current_frame(
+                                                     self.menu_input_akhir_psikologi_admin_footer_frame),
+                                                 self.menu_utama_admin()
+                                             ])
+        self.menu_utama_button = Button(self.menu_input_akhir_psikologi_admin_footer_frame, text="Logout", state=ACTIVE,
+                                        command=lambda: [
+                                            self.remove_current_frame(
+                                                self.menu_input_akhir_psikologi_admin_header_frame),
+                                            self.remove_current_frame(self.menu_input_akhir_psikologi_admin_frame),
+                                            self.remove_current_frame(
+                                                self.menu_input_akhir_psikologi_admin_footer_frame),
+                                            self.menu_utama()
+                                        ])
+        self.footer(self.menu_input_akhir_psikologi_admin_footer_frame)
 
     def keep_program_alive(self):
         self.root.mainloop()
