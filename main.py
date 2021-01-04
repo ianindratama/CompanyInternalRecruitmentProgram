@@ -3,6 +3,9 @@ from tkinter import *
 import tkinter.ttk as ttk
 from PIL import ImageTk, Image
 
+# Graph purpose
+import matplotlib.pyplot as plt
+
 # utilities purpose
 import sqlite3
 import datetime
@@ -68,6 +71,77 @@ class Utility:
         conn.close()
 
         return len(list_soal)
+
+    def printgraph(self, specifier):
+
+        xvalue = list()
+        yvalue = list()
+        y_label = ""
+        temp_data = list()
+        bar_color = list()
+        bar_width = float()
+
+        if specifier == "Status Pekerjaan" or specifier == "Kategori Pekerjaan":
+            y_label = "Jumlah Pekerjaan"
+            data_from_db = self.retrievedata("pekerjaan")
+            if specifier == "Status Pekerjaan":
+                xvalue = ["Tetap", "Intern"]
+
+                for i in range(0, len(data_from_db)):
+                    temp_data.append(data_from_db[i][3])
+
+                yvalue = [temp_data.count("Tetap"), temp_data.count("Intern")]
+
+                bar_color = ["blue", "red"]
+                bar_width = 0.8
+            elif specifier == "Kategori Pekerjaan":
+                xvalue = ["IT", "Bisnis", "ETC"]
+
+                for i in range(0, len(data_from_db)):
+                    temp_data.append(data_from_db[i][4])
+
+                yvalue = [temp_data.count("1"), temp_data.count("2"), temp_data.count("3")]
+                bar_color = ["blue", "red", "green"]
+                bar_width = 0.4
+        elif specifier == "Status Kelulusan" or specifier == "Jenis Kelamin":
+            y_label = "Jumlah Pelamar"
+            data_from_db = self.retrievedata("pelamar")
+            if specifier == "Status Kelulusan":
+                xvalue = ["Lulus", "Tidak Lulus"]
+
+                for i in range(0, len(data_from_db)):
+                    temp_data.append(data_from_db[i][2])
+
+                yvalue = [temp_data.count("Lulus"), temp_data.count("Tidak Lulus")]
+
+                bar_color = ["blue", "red"]
+                bar_width = 0.8
+            elif specifier == "Jenis Kelamin":
+                xvalue = ["Laki - Laki", "Perempuan"]
+
+                for i in range(0, len(data_from_db)):
+                    temp_data.append(data_from_db[i][6])
+
+                yvalue = [temp_data.count("L"), temp_data.count("P")]
+
+                bar_color = ["blue", "red"]
+                bar_width = 0.8
+
+        # matplotlib window configuration
+        plt.figure(figsize=(10, 5))
+        plt.get_current_fig_manager().window.wm_geometry("+500+100")
+
+        # matplotlib data display configuration the bar plot
+        plt.yticks(range(0, len(temp_data)+1))
+        barlist = plt.bar(xvalue, yvalue, width=bar_width)
+
+        for i in range(0, len(bar_color)):
+            barlist[i].set_color(bar_color[i])
+
+        plt.xlabel(specifier)
+        plt.ylabel(y_label)
+        plt.title("Data berdasarkan " + specifier)
+        plt.show()
 
 
 class MenuPelamar(Utility):
@@ -1702,6 +1776,9 @@ class Window:
         # progressbar progress
         progress['value'] = 20
         pelamar.get_data()
+        self.__clear_entry_jenis_kelamin_counter = 1        # reset jenis kelamin input placeholder
+        self.__clear_entry_pendidikan_terakhir_counter = 1  # reset pendidikan terakhir input placeholder
+        self.__clear_entry_pengalaman_kerja_counter = 1     # reset pengalaman kerja input placeholder
         self.menu_proses_pelamar_kerja_frame.update()
         time.sleep(1)
 
@@ -1955,6 +2032,25 @@ class Window:
 
         # container section
         self.__admin.printlist(frame)
+        label_menu_modify_kerja_admin = Label(frame,
+                                              text="Seleksi Data berdasarkan")
+        label_menu_modify_kerja_admin.grid(row=50, column=0, columnspan=2, pady=(20, 30), padx=(0, 10))
+
+        data_option = list()
+        data_option.append("Status Pekerjaan")
+        data_option.append("Kategori Pekerjaan")
+
+        pilihan_user = StringVar()
+        pilihan_user.set(data_option[0])
+
+        dropdown_data = OptionMenu(frame, pilihan_user, *data_option)
+        dropdown_data.grid(row=50, column=2, columnspan=2, pady=(20, 30), sticky=EW)
+
+        submit_pilihan_btn = Button(frame, text="Submit",
+                                    command=lambda: [
+                                        self.__admin.printgraph(pilihan_user.get())
+                                    ])
+        submit_pilihan_btn.grid(row=50, column=4, pady=(20, 30), ipadx=10, ipady=10)
 
         # footer section
         self.date_time_label = Label(self.menu_list_kerja_admin_footer_frame, text="", fg="Red",
@@ -1986,6 +2082,25 @@ class Window:
 
         # container section
         self.__admin.printlist_pelamar(frame)
+        label_menu_modify_kerja_admin = Label(frame,
+                                              text="Seleksi Data berdasarkan")
+        label_menu_modify_kerja_admin.grid(row=50, column=0, columnspan=2, pady=(20, 30), padx=(0, 10))
+
+        data_option = list()
+        data_option.append("Status Kelulusan")
+        data_option.append("Jenis Kelamin")
+
+        pilihan_user = StringVar()
+        pilihan_user.set(data_option[0])
+
+        dropdown_data = OptionMenu(frame, pilihan_user, *data_option)
+        dropdown_data.grid(row=50, column=2, columnspan=2, pady=(20, 30), sticky=EW)
+
+        submit_pilihan_btn = Button(frame, text="Submit",
+                                    command=lambda: [
+                                        self.__admin.printgraph(pilihan_user.get())
+                                    ])
+        submit_pilihan_btn.grid(row=50, column=4, pady=(20, 30), ipadx=10, ipady=10)
 
         # footer section
         self.date_time_label = Label(self.menu_list_pelamar_admin_footer_frame, text="", fg="Red",
@@ -2050,6 +2165,10 @@ class Window:
         self.header(self.menu_input_akhir_kerja_admin_header_frame)
 
         # container section
+
+        window.__clear_entry_status_counter = 1     # reset status pekerjaan input placeholder
+        window.__clear_entry_kategori_counter = 1   # reset kategori pekerjaan input placeholder
+
         sukses_image = Label(self.menu_input_akhir_kerja_admin_frame, image=self.__sukses_image)
         sukses_image.grid(row=0, rowspan=2, column=0, columnspan=3, pady=(10, 10))
 
