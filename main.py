@@ -707,6 +707,8 @@ class Admin(Utility):
 
             counter += 1
 
+        Label(frame, text="").grid(row=len(data_psikologi)+1, column=0, pady=(0, 20))
+
     @staticmethod
     def __check_priority_question(pertanyaan, check):
 
@@ -1145,15 +1147,15 @@ class Admin(Utility):
                                                                                     padx=(20, 0), pady=(0, 10))
 
         Label(frame, text="Soal Psikologi").grid(row=2, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
-        self.__soal_psikologi = Entry(frame, width=40)
+        self.__soal_psikologi = Entry(frame, width=60)
         self.__soal_psikologi.grid(row=2, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
         Label(frame, text="Nilai Minimum Psikologi").grid(row=3, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
-        self.__nilai_minimum_psikologi = Entry(frame, width=40)
+        self.__nilai_minimum_psikologi = Entry(frame, width=60)
         self.__nilai_minimum_psikologi.grid(row=3, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
         Label(frame, text="Nilai Maximum Psikologi").grid(row=4, column=0, sticky=W, padx=(20, 10), pady=(0, 20))
-        self.__nilai_maximum_psikologi = Entry(frame, width=40)
+        self.__nilai_maximum_psikologi = Entry(frame, width=60)
         self.__nilai_maximum_psikologi.grid(row=4, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 20))
 
         submit_btn = Button(frame, text="Submit",
@@ -1261,19 +1263,19 @@ class Admin(Utility):
 
         Label(frame, text="Soal Psikologi").grid(row=1, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
         temp_soal_psikologi = self.__soal_psikologi
-        self.__soal_psikologi = Entry(frame, width=40)
+        self.__soal_psikologi = Entry(frame, width=60)
         self.__soal_psikologi.insert(0, temp_soal_psikologi)
         self.__soal_psikologi.grid(row=1, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
         Label(frame, text="Nilai Minimum Kelulusan").grid(row=2, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
         temp_nilai_minimum_psikologi = self.__nilai_minimum_psikologi
-        self.__nilai_minimum_psikologi = Entry(frame, width=40)
+        self.__nilai_minimum_psikologi = Entry(frame, width=60)
         self.__nilai_minimum_psikologi.insert(0, temp_nilai_minimum_psikologi)
         self.__nilai_minimum_psikologi.grid(row=2, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
         Label(frame, text="Nilai Maximum Kelulusan").grid(row=3, column=0, sticky=W, padx=(20, 10), pady=(0, 10))
         temp_nilai_maximum_psikologi = self.__nilai_maximum_psikologi
-        self.__nilai_maximum_psikologi = Entry(frame, width=40)
+        self.__nilai_maximum_psikologi = Entry(frame, width=60)
         self.__nilai_maximum_psikologi.insert(0, temp_nilai_maximum_psikologi)
         self.__nilai_maximum_psikologi.grid(row=3, column=1, columnspan=2, sticky=W + E, padx=(0, 10), pady=(0, 10))
 
@@ -1364,7 +1366,6 @@ class Window:
         self.root = Tk()
         self.root.title("Program Seleksi Kerja PT XYZ")
         self.root.iconbitmap('icon.ico')
-        self.root.rowconfigure(3, weight=1)
         self.program_geometry = "500x300+525+200"
         self.date_time_label = Label(self.root, text="", fg="Red", font=("Helvetica", 10))
         self.menu_sebelumnya_button = Button(self.root, text="Menu Sebelumnya", state=DISABLED)
@@ -1554,9 +1555,10 @@ class Window:
 
         # program logo image
         program_logo_image_label = Label(frame, image=self.__program_logo_image)
-        program_logo_image_label.grid(row=0, rowspan=2, column=2, pady=(10, 10), sticky=E)
+        program_logo_image_label.grid(row=0, rowspan=2, column=2, pady=(10, 10))
 
     def footer(self, frame):
+        frame["bg"] = "red"
         # date time label
         now = datetime.datetime.now().strftime("%A, %d %B %Y %H:%M:%S")
         self.date_time_label.configure(text=now)
@@ -1605,10 +1607,11 @@ class Window:
         self.footer(self.menu_utama_footer_frame)
 
     def menu_utama_pelamar_kerja(self, frame):
-        self.program_geometry = "550x300+525+200"
+        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pekerjaan"))))
+        self.program_geometry = "600x" + y_geometry + "+475+200"
         self.root.geometry(self.program_geometry)
 
-        self.menu_utama_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
+        self.menu_utama_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
                                                         padx=(25, 0))
         frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_utama_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
@@ -1640,11 +1643,10 @@ class Window:
         self.footer(self.menu_utama_pelamar_kerja_footer_frame)
 
     def menu_isi_data_diri_pelamar_kerja(self, pelamar, frame):
-        self.program_geometry = "590x450+500+150"
+        self.program_geometry = "550x450+500+150"
         self.root.geometry(self.program_geometry)
 
-        self.menu_isi_data_diri_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
-                                                                padx=(25, 0))
+        self.menu_isi_data_diri_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
         frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_isi_data_diri_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
                                                                 padx=(25, 0))
@@ -1693,8 +1695,7 @@ class Window:
         self.program_geometry = "900x710+300+50"
         self.root.geometry(self.program_geometry)
 
-        self.menu_isi_pertanyaan_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
-                                                                 padx=(25, 0))
+        self.menu_isi_pertanyaan_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
         frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_isi_pertanyaan_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3,
                                                                  sticky="WE", padx=(25, 0))
@@ -1743,8 +1744,7 @@ class Window:
         self.program_geometry = "600x350+550+200"
         self.root.geometry(self.program_geometry)
 
-        self.menu_proses_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
-                                                         padx=(25, 0))
+        self.menu_proses_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
         self.menu_proses_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_proses_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
@@ -1807,8 +1807,7 @@ class Window:
         self.program_geometry = "610x350+550+200"
         self.root.geometry(self.program_geometry)
 
-        self.menu_akhir_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
-                                                        padx=(25, 0))
+        self.menu_akhir_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
         self.menu_akhir_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_akhir_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
@@ -1903,7 +1902,7 @@ class Window:
         self.footer(self.menu_login_admin_footer_frame)
 
     def menu_utama_admin(self):
-        self.program_geometry = "500x310+525+200"
+        self.program_geometry = "475x310+530+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_utama_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=2)
@@ -2020,7 +2019,8 @@ class Window:
         self.footer(self.menu_panel_kerja_admin_footer_frame)
 
     def menu_list_kerja_admin(self, frame):
-        self.program_geometry = "800x450+340+150"
+        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pekerjaan"))))
+        self.program_geometry = "850x" + y_geometry + "+350+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_list_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2070,7 +2070,8 @@ class Window:
         self.footer(self.menu_list_kerja_admin_footer_frame)
 
     def menu_list_pelamar_admin(self, frame):
-        self.program_geometry = "800x450+340+150"
+        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pelamar"))))
+        self.program_geometry = "850x" + y_geometry + "+350+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_list_pelamar_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2156,8 +2157,7 @@ class Window:
         self.program_geometry = "670x350+430+200"
         self.root.geometry(self.program_geometry)
 
-        self.menu_input_akhir_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
-                                                            padx=(25, 0))
+        self.menu_input_akhir_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
         self.menu_input_akhir_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_input_akhir_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
@@ -2198,7 +2198,8 @@ class Window:
         self.footer(self.menu_input_akhir_kerja_admin_footer_frame)
 
     def menu_modify_kerja_admin(self, frame):
-        self.program_geometry = "800x450+340+150"
+        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pekerjaan"))))
+        self.program_geometry = "850x" + y_geometry + "+350+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_modify_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2279,7 +2280,7 @@ class Window:
         self.root.geometry(self.program_geometry)
 
         self.menu_input_modify_akhir_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
-                                                                   sticky="WE", padx=(25, 0))
+                                                                   padx=(25, 0))
         self.menu_input_modify_akhir_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_input_modify_akhir_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
                                                                    padx=(25, 0))
@@ -2321,7 +2322,8 @@ class Window:
         self.footer(self.menu_input_modify_akhir_kerja_admin_footer_frame)
 
     def menu_delete_kerja_admin(self, frame):
-        self.program_geometry = "800x450+340+150"
+        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pekerjaan"))))
+        self.program_geometry = "850x" + y_geometry + "+350+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_delete_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2363,7 +2365,7 @@ class Window:
         self.root.geometry(self.program_geometry)
 
         self.menu_delete_akhir_kerja_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
-                                                             sticky="WE", padx=(25, 0))
+                                                             padx=(25, 0))
         self.menu_delete_akhir_kerja_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_delete_akhir_kerja_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
                                                              padx=(25, 0))
@@ -2405,7 +2407,7 @@ class Window:
         self.footer(self.menu_delete_akhir_kerja_admin_footer_frame)
 
     def menu_panel_psikologi_admin(self, frame):
-        self.program_geometry = "690x450+405+150"
+        self.program_geometry = "630x430+475+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_panel_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3)
@@ -2484,7 +2486,8 @@ class Window:
         self.footer(self.menu_panel_psikologi_admin_footer_frame)
 
     def menu_list_psikologi_admin(self, frame):
-        self.program_geometry = "1040x450+240+150"
+        y_geometry = str(250 + (15 * len(self.__menu_pelamar.retrievedata("test_psikologi"))))
+        self.program_geometry = "1040x" + y_geometry + "+240+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_list_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2516,7 +2519,7 @@ class Window:
         self.footer(self.menu_list_psikologi_admin_footer_frame)
 
     def menu_input_psikologi_admin(self, jumlah_soal, frame):
-        self.program_geometry = "600x650+450+50"
+        self.program_geometry = "600x400+500+160"
         self.root.geometry(self.program_geometry)
 
         self.menu_input_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3)
@@ -2554,7 +2557,7 @@ class Window:
         self.program_geometry = "670x350+430+200"
         self.root.geometry(self.program_geometry)
 
-        self.menu_input_akhir_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, sticky="WE",
+        self.menu_input_akhir_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
                                                                 padx=(25, 0))
         self.menu_input_akhir_psikologi_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_input_akhir_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
@@ -2595,7 +2598,8 @@ class Window:
         self.footer(self.menu_input_akhir_psikologi_admin_footer_frame)
 
     def menu_modify_psikologi_admin(self, frame):
-        self.program_geometry = "1240x450+140+150"
+        y_geometry = str(350 + (15 * len(self.__menu_pelamar.retrievedata("test_psikologi"))))
+        self.program_geometry = "1240x" + y_geometry + "+140+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_modify_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2682,7 +2686,7 @@ class Window:
         self.root.geometry(self.program_geometry)
 
         self.menu_input_modify_akhir_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
-                                                                       sticky="WE", padx=(25, 0))
+                                                                       padx=(25, 0))
         self.menu_input_modify_akhir_psikologi_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE",
                                                                 padx=(25, 0))
         self.menu_input_modify_akhir_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
@@ -2727,7 +2731,8 @@ class Window:
         self.footer(self.menu_input_modify_akhir_psikologi_admin_footer_frame)
 
     def menu_delete_psikologi_admin(self, frame):
-        self.program_geometry = "1240x450+140+150"
+        y_geometry = str(350 + (15 * len(self.__menu_pelamar.retrievedata("test_psikologi"))))
+        self.program_geometry = "1240x" + y_geometry + "+140+150"
         self.root.geometry(self.program_geometry)
 
         self.menu_delete_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2771,7 +2776,7 @@ class Window:
         self.root.geometry(self.program_geometry)
 
         self.menu_delete_akhir_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3,
-                                                                 sticky="WE", padx=(25, 0))
+                                                                 padx=(25, 0))
         self.menu_delete_akhir_psikologi_admin_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_delete_akhir_psikologi_admin_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE",
                                                                  padx=(25, 0))
