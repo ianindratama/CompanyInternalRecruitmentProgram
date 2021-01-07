@@ -11,9 +11,11 @@ import sqlite3
 import datetime
 import time
 
-# email purpose
+# email and whatsapp purpose
 import smtplib
-# libraries for email texting
+from twilio.rest import Client
+
+# email texting purpose
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -76,12 +78,14 @@ class Utility:
 
         xvalue = list()
         yvalue = list()
+        title_label = ""
         y_label = ""
         temp_data = list()
         bar_color = list()
         bar_width = float()
 
         if specifier == "Status Pekerjaan" or specifier == "Kategori Pekerjaan":
+            title_label = "Lowongan Pekerjaan"
             y_label = "Jumlah Pekerjaan"
             data_from_db = self.retrievedata("pekerjaan")
             if specifier == "Status Pekerjaan":
@@ -104,6 +108,7 @@ class Utility:
                 bar_color = ["blue", "red", "green"]
                 bar_width = 0.4
         elif specifier == "Status Kelulusan" or specifier == "Jenis Kelamin":
+            title_label = "Pelamar"
             y_label = "Jumlah Pelamar"
             data_from_db = self.retrievedata("pelamar")
             if specifier == "Status Kelulusan":
@@ -140,7 +145,7 @@ class Utility:
 
         plt.xlabel(specifier)
         plt.ylabel(y_label)
-        plt.title("Data berdasarkan " + specifier)
+        plt.title("Data " + title_label + " berdasarkan " + specifier)
         plt.show()
 
 
@@ -254,11 +259,13 @@ class Pelamar:
 
         self.__nama_lengkap = ""
         self.__email = ""
-        self.__no_hp = ""
+        self.__no_hp = "Gunakan Format +62"
         self.__jenis_kelamin = "(L : Laki - Laki | P : Perempuan)"
         self.__pendidikan_terakhir = "(ex : S1 Teknik Komputer)"
         self.__lama_pengalaman_kerja = "(dalam tahun ex : 5)"
         self.__tanggal_applied = datetime.datetime.now().strftime("%d/%m/%Y")
+
+        self.pilihan_pemberitahuan = IntVar()
 
         self.__tuple_jawaban_kerja = list()
         for i in range(0, len(data[2])):
@@ -295,8 +302,11 @@ class Pelamar:
         self.__email.grid(row=2, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
 
         Label(frame, text="No HP", font=("Helvetica", 10)).grid(row=3, column=0, sticky=W, pady=(0, 10))
-        if self.__no_hp == "":
+        if self.__no_hp == "Gunakan Format +62":
             self.__no_hp = Entry(frame, width=40)
+            self.__no_hp.insert(0, "Gunakan Format +62")
+            self.__no_hp.bind("<Button-1>",
+                              lambda event: window.clear_entry_no_hp_once(self.__no_hp))
         else:
             temp = self.__no_hp
             self.__no_hp = Entry(frame, width=40)
@@ -340,6 +350,16 @@ class Pelamar:
             self.__lama_pengalaman_kerja = Entry(frame, width=40)
             self.__lama_pengalaman_kerja.insert(0, temp)
         self.__lama_pengalaman_kerja.grid(row=6, column=1, columnspan=2, padx=(10, 0), pady=(0, 10))
+
+        Label(frame, text="Pilih metode pemberitahuan Kelulusan",
+              font=("Helvetica", 10)).grid(row=7, column=0, sticky=W, pady=(0, 10))
+
+        radio_button_options = [("Via Email", 1), ("Via Whatsapp", 2)]
+
+        for j in range(0, len(radio_button_options)):
+            Radiobutton(frame, text=radio_button_options[j][0],
+                        variable=self.pilihan_pemberitahuan,
+                        value=radio_button_options[j][1]).grid(row=7, column=j + 1, pady=(0, 10))
 
     def isi_data_pertanyaan(self, frame):
         radio_button_options = [
@@ -402,6 +422,7 @@ class Pelamar:
         self.__jenis_kelamin = self.__jenis_kelamin.get()
         self.__pendidikan_terakhir = self.__pendidikan_terakhir.get()
         self.__lama_pengalaman_kerja = self.__lama_pengalaman_kerja.get()
+        self.pilihan_pemberitahuan = self.pilihan_pemberitahuan.get()
 
     def get_data(self):
 
@@ -443,8 +464,9 @@ class Pelamar:
 
 class Evaluate(Utility):
 
-    def __init__(self, id_pelamar):
+    def __init__(self, id_pelamar, metode_pemberitahuan):
         self.__id_pelamar = id_pelamar
+        self.__metode_pemberitahuan = metode_pemberitahuan
 
     def retrievedata(self):
 
@@ -540,8 +562,8 @@ class Evaluate(Utility):
 
         conn.close()
 
-    def send_ke_email_pelamar(self):
-        data = self.retrievedata()
+    @staticmethod
+    def send_ke_email_pelamar(data):
 
         # header : from, to, subject
 
@@ -598,6 +620,50 @@ class Evaluate(Utility):
         server.sendmail(from_email, to_email, message)
 
         server.quit()
+
+    @staticmethod
+    def send_ke_whatsapp_pelamar(data):
+        account_sid = "AC681028cbb981efe3d09a2b79a0ee4343"
+        auth_token = "e853a9709ae58e5ae574da934525bbff"
+
+        client = Client(account_sid, auth_token)
+
+        from_whatsapp_number = "whatsapp:+14155238886"
+        to_whatsapp_number = "whatsapp:" + data[0][5]
+
+        # body
+        body = "*Halo " + str(data[0][3]) + ",*"
+
+        if data[0][2] == "Tidak Lulus":
+            body += "\nMohon maaf anda belum lolos tahap 1 lamaran kerja perusahan PT XYZ sebagai " + str(data[1][1])
+        elif data[0][2] == "Lulus":
+            body += "\nSelamat anda lolos tahap 1 lamaran kerja perusahan PT XYZ sebagai " + str(data[1][1])
+
+            # konversi dari tanggal di database ke string
+            date_str = data[0][9]
+            date_obj = datetime.datetime.strptime(date_str, "%d/%m/%Y")
+
+            # pertemuan tahap ke dua akan dilangsungkan 3 hari setelah pelamar melakukan tahap satu
+            date = date_obj.date()
+            date += datetime.timedelta(days=3)
+
+            # mengecek apakah hari nya itu sabtu atau minggu kalau iya pindahin ke minggu
+            day = date.strftime("%A")
+
+            if day == "Saturday":
+                day = "Monday"
+                date += datetime.timedelta(days=2)
+            elif day == "Sunday":
+                day = "Monday"
+                date += datetime.timedelta(days=1)
+
+            body += ".\nSilahkan Datang ke kantor pada hari " + day + " jam 9 WIB pada tanggal " + str(date)
+
+        body += "\n\nDari HRD PT XYZ\n*Joko Syamsudin*"
+
+        client.messages.create(body=body,
+                               from_=from_whatsapp_number,
+                               to=to_whatsapp_number)
 
 
 class Admin(Utility):
@@ -1373,6 +1439,7 @@ class Window:
 
         # image in program
         self.__program_logo_image = ImageTk.PhotoImage((Image.open("logo1.png")).resize((75, 75)))
+        self.__whatsapp = ImageTk.PhotoImage((Image.open("wa.jpeg")).resize((350, 450)))
         self.__harap_tunggu_image = ImageTk.PhotoImage((Image.open("harap_tunggu.png")).resize((150, 100)))
         self.__sukses_image = ImageTk.PhotoImage((Image.open("sukses.png")).resize((150, 100)))
 
@@ -1381,6 +1448,7 @@ class Window:
         self.__admin = Admin()
 
         # counter for clearing entry once
+        self.__clear_entry_no_hp_counter = 1
         self.__clear_entry_jenis_kelamin_counter = 1
         self.__clear_entry_pendidikan_terakhir_counter = 1
         self.__clear_entry_pengalaman_kerja_counter = 1
@@ -1406,6 +1474,11 @@ class Window:
         self.menu_isi_pertanyaan_pelamar_kerja_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_isi_pertanyaan_pelamar_kerja_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
+        # frame menu akhir pelamar kerja
+        self.menu_tutorial_wa_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_tutorial_wa_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+        self.menu_tutorial_wa_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
+
         # frame menu proses pelamar kerja
         self.menu_proses_pelamar_kerja_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_proses_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
@@ -1413,7 +1486,6 @@ class Window:
 
         # frame menu akhir pelamar kerja
         self.menu_akhir_pelamar_kerja_header_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
-        self.menu_akhir_pelamar_kerja_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
         self.menu_akhir_pelamar_kerja_footer_frame = LabelFrame(self.root, bd=0, highlightthickness=0)
 
         # kumpulan frame menu admin
@@ -1523,6 +1595,11 @@ class Window:
     def destroy_current_frame(current_frame):
         current_frame.destroy()
 
+    def clear_entry_no_hp_once(self, entry):
+        if self.__clear_entry_no_hp_counter == 1:
+            entry.delete(0, END)
+            self.__clear_entry_no_hp_counter -= 1
+
     def clear_entry_jenis_kelamin_once(self, entry):
         if self.__clear_entry_jenis_kelamin_counter == 1:
             entry.delete(0, END)
@@ -1558,7 +1635,6 @@ class Window:
         program_logo_image_label.grid(row=0, rowspan=2, column=2, pady=(10, 10))
 
     def footer(self, frame):
-        frame["bg"] = "red"
         # date time label
         now = datetime.datetime.now().strftime("%A, %d %B %Y %H:%M:%S")
         self.date_time_label.configure(text=now)
@@ -1620,6 +1696,10 @@ class Window:
         self.header(self.menu_utama_pelamar_kerja_header_frame)
 
         # container section
+        self.__clear_entry_no_hp_counter = 1    # reset no hp input placeholder
+        self.__clear_entry_jenis_kelamin_counter = 1  # reset jenis kelamin input placeholder
+        self.__clear_entry_pendidikan_terakhir_counter = 1  # reset pendidikan terakhir input placeholder
+        self.__clear_entry_pengalaman_kerja_counter = 1  # reset pengalaman kerja input placeholder
         self.__menu_pelamar.menu_utama(self.menu_utama_pelamar_kerja_header_frame, frame,
                                        self.menu_utama_pelamar_kerja_footer_frame)
 
@@ -1643,7 +1723,7 @@ class Window:
         self.footer(self.menu_utama_pelamar_kerja_footer_frame)
 
     def menu_isi_data_diri_pelamar_kerja(self, pelamar, frame):
-        self.program_geometry = "550x450+500+150"
+        self.program_geometry = "550x500+500+125"
         self.root.geometry(self.program_geometry)
 
         self.menu_isi_data_diri_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -1665,7 +1745,7 @@ class Window:
                                 self.remove_current_frame(self.menu_isi_data_diri_pelamar_kerja_footer_frame),
                                 self.menu_isi_pertanyaan_pelamar_kerja(pelamar, LabelFrame(self.root, bd=0,
                                                                                            highlightthickness=0))])
-        submit_btn.grid(row=7, column=2, pady=(20, 40), ipadx=10, sticky=W + E)
+        submit_btn.grid(row=8, column=2, pady=(20, 40), ipadx=10, sticky=W + E)
 
         # footer section
         self.date_time_label = Label(self.menu_isi_data_diri_pelamar_kerja_footer_frame, text="", fg="Red",
@@ -1711,7 +1791,8 @@ class Window:
                                 self.remove_current_frame(self.menu_isi_pertanyaan_pelamar_kerja_header_frame),
                                 self.destroy_current_frame(frame),
                                 self.remove_current_frame(self.menu_isi_pertanyaan_pelamar_kerja_footer_frame),
-                                self.menu_proses_pelamar_kerja(pelamar)])
+                                self.menu_proses_pelamar_kerja(
+                                    pelamar) if pelamar.pilihan_pemberitahuan == 1 else self.menu_tutorial_wa(pelamar)])
         submit_btn.grid(row=80, column=0, columnspan=3, pady=(20, 20), ipadx=10, sticky=E)
 
         # footer section
@@ -1739,6 +1820,56 @@ class Window:
                                                 self.menu_isi_pertanyaan_pelamar_kerja_footer_frame),
                                             self.menu_utama()])
         self.footer(self.menu_isi_pertanyaan_pelamar_kerja_footer_frame)
+
+    def menu_tutorial_wa(self, pelamar):
+        self.program_geometry = "1000x625+250+75"
+        self.root.geometry(self.program_geometry)
+
+        self.menu_tutorial_wa_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
+        self.menu_tutorial_wa_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        self.menu_tutorial_wa_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+
+        # header section
+        self.header(self.menu_tutorial_wa_header_frame)
+
+        # container section
+        sukses_image = Label(self.menu_tutorial_wa_frame, image=self.__whatsapp)
+        sukses_image.grid(row=0, rowspan=50, column=0, columnspan=2, pady=(10, 20))
+
+        Label(self.menu_tutorial_wa_frame,
+              text="Langkah - langkah menerima pemberitahuan kelulusan melalui Whatsapp :",
+              font=("Helvetica", 10, "bold")).grid(row=20, column=3, padx=(20, 10), pady=(10, 10), sticky=W)
+
+        Label(self.menu_tutorial_wa_frame,
+              text="1. Simpan No HP berikut : +14155238886 dan namakan kontak sesuai keinginan anda",
+              font=("Helvetica", 10, "bold")).grid(row=21, column=3, padx=(20, 10), pady=(10, 10), sticky=W)
+
+        Label(self.menu_tutorial_wa_frame,
+              text="2. Buka aplikasi Whatsapp anda, kemudian kirim pesan \"join try-will\" ke kontak tersebut",
+              font=("Helvetica", 10, "bold")).grid(row=22, column=3, padx=(20, 10), pady=(10, 10), sticky=W)
+
+        Label(self.menu_tutorial_wa_frame,
+              text="3. Tunggu hingga mendapat pesan seperti gambar disamping",
+              font=("Helvetica", 10, "bold")).grid(row=23, column=3, padx=(20, 10), pady=(10, 10), sticky=W)
+
+        Label(self.menu_tutorial_wa_frame,
+              text="4. Klik tombol \"OK\" dibawah ini untuk mendapat pemberitahuan kelulusan",
+              font=("Helvetica", 10, "bold")).grid(row=24, column=3, padx=(20, 10), pady=(10, 10), sticky=W)
+
+        Button(self.menu_tutorial_wa_frame, text="OK",
+               command=lambda: [self.remove_current_frame(self.menu_tutorial_wa_header_frame),
+                                self.remove_current_frame(self.menu_tutorial_wa_frame),
+                                self.remove_current_frame(self.menu_tutorial_wa_footer_frame),
+                                self.menu_proses_pelamar_kerja(pelamar)]).grid(row=25, column=3, padx=(20, 10),
+                                                                               pady=(10, 10), ipadx=50, ipady=10)
+
+        # footer section
+        self.date_time_label = Label(self.menu_tutorial_wa_footer_frame, text="", fg="Red",
+                                     font=("Helvetica", 10))
+        self.menu_sebelumnya_button = Button(self.menu_tutorial_wa_footer_frame,
+                                             text="Menu Sebelumnya", state=DISABLED)
+        self.menu_utama_button = Button(self.menu_tutorial_wa_footer_frame, text="Menu Utama", state=DISABLED)
+        self.footer(self.menu_tutorial_wa_footer_frame)
 
     def menu_proses_pelamar_kerja(self, pelamar):
         self.program_geometry = "600x350+550+200"
@@ -1776,14 +1907,11 @@ class Window:
         # progressbar progress
         progress['value'] = 20
         pelamar.get_data()
-        self.__clear_entry_jenis_kelamin_counter = 1        # reset jenis kelamin input placeholder
-        self.__clear_entry_pendidikan_terakhir_counter = 1  # reset pendidikan terakhir input placeholder
-        self.__clear_entry_pengalaman_kerja_counter = 1     # reset pengalaman kerja input placeholder
         self.menu_proses_pelamar_kerja_frame.update()
         time.sleep(1)
 
         progress['value'] = 50
-        proses = Evaluate(pelamar.send_to_database())
+        proses = Evaluate(pelamar.send_to_database(), pelamar.pilihan_pemberitahuan)
         self.menu_proses_pelamar_kerja_frame.update()
         time.sleep(1)
 
@@ -1793,7 +1921,14 @@ class Window:
         time.sleep(1)
 
         progress['value'] = 200
-        proses.send_ke_email_pelamar()
+
+        data = proses.retrievedata()
+
+        if pelamar.pilihan_pemberitahuan == 1:
+            proses.send_ke_email_pelamar(data)
+        elif pelamar.pilihan_pemberitahuan == 2:
+            proses.send_ke_whatsapp_pelamar(data)
+
         self.menu_proses_pelamar_kerja_frame.update()
         time.sleep(1)
 
@@ -1801,26 +1936,31 @@ class Window:
         self.remove_current_frame(self.menu_proses_pelamar_kerja_header_frame)
         self.remove_current_frame(self.menu_proses_pelamar_kerja_frame)
         self.remove_current_frame(self.menu_proses_pelamar_kerja_footer_frame)
-        self.menu_akhir_pelamar_kerja()
+        self.menu_akhir_pelamar_kerja(LabelFrame(self.root, bd=0, highlightthickness=0), pelamar.pilihan_pemberitahuan)
 
-    def menu_akhir_pelamar_kerja(self):
-        self.program_geometry = "610x350+550+200"
+    def menu_akhir_pelamar_kerja(self, frame, pilihan_pemberitahuan):
+        self.program_geometry = "650x325+475+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_akhir_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
-        self.menu_akhir_pelamar_kerja_frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
+        frame.grid(row=2, column=0, columnspan=3, sticky="WE", padx=(25, 0))
         self.menu_akhir_pelamar_kerja_footer_frame.grid(row=3, column=0, columnspan=3, sticky="WE", padx=(25, 0))
 
         # header section
         self.header(self.menu_akhir_pelamar_kerja_header_frame)
 
         # container section
-        sukses_image = Label(self.menu_akhir_pelamar_kerja_frame, image=self.__sukses_image)
+        sukses_image = Label(frame, image=self.__sukses_image)
         sukses_image.grid(row=0, rowspan=2, column=0, columnspan=3, pady=(10, 10))
 
-        Label(self.menu_akhir_pelamar_kerja_frame,
-              text="Sukses melamar pekerjaan, silahkan buka email anda untuk pemberitahuan selanjutnya",
-              font=("Helvetica", 10, "bold")).grid(row=2, column=0, columnspan=3, pady=(10, 10))
+        txt = str()
+
+        if pilihan_pemberitahuan == 1:
+            txt = "Sukses melamar pekerjaan, silahkan buka email anda untuk pemberitahuan selanjutnya"
+        elif pilihan_pemberitahuan == 2:
+            txt = "Sukses melamar pekerjaan, silahkan buka whatsapp anda untuk pemberitahuan selanjutnya"
+
+        Label(frame, text=txt, font=("Helvetica", 10, "bold")).grid(row=2, column=0, columnspan=3, pady=(10, 30))
 
         # footer section
         self.date_time_label = Label(self.menu_akhir_pelamar_kerja_footer_frame, text="", fg="Red",
@@ -1830,7 +1970,7 @@ class Window:
         self.menu_utama_button = Button(self.menu_akhir_pelamar_kerja_footer_frame, text="Menu Utama", state=ACTIVE,
                                         command=lambda: [
                                             self.remove_current_frame(self.menu_akhir_pelamar_kerja_header_frame),
-                                            self.remove_current_frame(self.menu_akhir_pelamar_kerja_frame),
+                                            self.destroy_current_frame(frame),
                                             self.remove_current_frame(self.menu_akhir_pelamar_kerja_footer_frame),
                                             self.menu_utama()
                                         ])
@@ -2487,7 +2627,7 @@ class Window:
 
     def menu_list_psikologi_admin(self, frame):
         y_geometry = str(250 + (15 * len(self.__menu_pelamar.retrievedata("test_psikologi"))))
-        self.program_geometry = "1040x" + y_geometry + "+240+150"
+        self.program_geometry = "1040x" + y_geometry + "+240+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_list_psikologi_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
