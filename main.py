@@ -356,9 +356,13 @@ class Pelamar:
 
         radio_button_options = [("Via Email", 1), ("Via Whatsapp", 2)]
 
+        if isinstance(self.pilihan_pemberitahuan, int):
+            temp = self.pilihan_pemberitahuan
+            self.pilihan_pemberitahuan = IntVar()
+            self.pilihan_pemberitahuan.set(temp)
+
         for j in range(0, len(radio_button_options)):
-            Radiobutton(frame, text=radio_button_options[j][0],
-                        variable=self.pilihan_pemberitahuan,
+            Radiobutton(frame, text=radio_button_options[j][0], variable=self.pilihan_pemberitahuan,
                         value=radio_button_options[j][1]).grid(row=7, column=j + 1, pady=(0, 10))
 
     def isi_data_pertanyaan(self, frame):
@@ -1867,8 +1871,21 @@ class Window:
         self.date_time_label = Label(self.menu_tutorial_wa_footer_frame, text="", fg="Red",
                                      font=("Helvetica", 10))
         self.menu_sebelumnya_button = Button(self.menu_tutorial_wa_footer_frame,
-                                             text="Menu Sebelumnya", state=DISABLED)
-        self.menu_utama_button = Button(self.menu_tutorial_wa_footer_frame, text="Menu Utama", state=DISABLED)
+                                             text="Menu Sebelumnya",
+                                             command=lambda: [
+                                                 self.remove_current_frame(self.menu_tutorial_wa_header_frame),
+                                                 self.remove_current_frame(self.menu_tutorial_wa_frame),
+                                                 self.remove_current_frame(self.menu_tutorial_wa_footer_frame),
+                                                 self.menu_isi_pertanyaan_pelamar_kerja(pelamar,
+                                                                                        LabelFrame(self.root, bd=0,
+                                                                                                   highlightthickness=0)
+                                                                                        )])
+        self.menu_utama_button = Button(self.menu_tutorial_wa_footer_frame, text="Menu Utama",
+                                        command=lambda: [
+                                            self.remove_current_frame(self.menu_tutorial_wa_header_frame),
+                                            self.remove_current_frame(self.menu_tutorial_wa_frame),
+                                            self.remove_current_frame(self.menu_tutorial_wa_footer_frame),
+                                            self.menu_utama()])
         self.footer(self.menu_tutorial_wa_footer_frame)
 
     def menu_proses_pelamar_kerja(self, pelamar):
