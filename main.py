@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import sqlite3
 import datetime
 import time
+from babel.dates import format_datetime
 
 # email and whatsapp purpose
 import smtplib
@@ -628,7 +629,7 @@ class Evaluate(Utility):
     @staticmethod
     def send_ke_whatsapp_pelamar(data):
         account_sid = "AC681028cbb981efe3d09a2b79a0ee4343"
-        auth_token = "e853a9709ae58e5ae574da934525bbff"
+        auth_token = "310b939426902f1ce54336ee4d90ce31"
 
         client = Client(account_sid, auth_token)
 
@@ -643,7 +644,7 @@ class Evaluate(Utility):
         elif data[0][2] == "Lulus":
             body += "\nSelamat anda lolos tahap 1 lamaran kerja perusahan PT XYZ sebagai " + str(data[1][1])
 
-            # konversi dari tanggal di database ke string
+            # konversi dari 'str' tanggal di database ke tipe data tanggal/waktu 'tzinfo'
             date_str = data[0][9]
             date_obj = datetime.datetime.strptime(date_str, "%d/%m/%Y")
 
@@ -652,16 +653,18 @@ class Evaluate(Utility):
             date += datetime.timedelta(days=3)
 
             # mengecek apakah hari nya itu sabtu atau minggu kalau iya pindahin ke minggu
-            day = date.strftime("%A")
+            day = format_datetime(date, format="EEEE", locale="id")
 
-            if day == "Saturday":
-                day = "Monday"
+            if day == "Sabtu":
+                day = "Senin"
                 date += datetime.timedelta(days=2)
-            elif day == "Sunday":
-                day = "Monday"
+            elif day == "Minggu":
+                day = "Senin"
                 date += datetime.timedelta(days=1)
 
-            body += ".\nSilahkan Datang ke kantor pada hari " + day + " jam 9 WIB pada tanggal " + str(date)
+            date = format_datetime(date, format="dd MMMM Y", locale="id")
+
+            body += ".\nSilahkan datang ke kantor pada hari " + day + " jam 09.00 WIB pada tanggal " + str(date)
 
         body += "\n\nDari HRD PT XYZ\n*Joko Syamsudin*"
 
@@ -1640,7 +1643,8 @@ class Window:
 
     def footer(self, frame):
         # date time label
-        now = datetime.datetime.now().strftime("%A, %d %B %Y %H:%M:%S")
+        now = datetime.datetime.now()
+        now = format_datetime(now, format="EEEE, dd MMMM Y HH:mm:ss", locale="id")
         self.date_time_label.configure(text=now)
         self.date_time_label.grid(row=0, column=0, sticky=W, padx=(10, 10), pady=(0, 10))
 
@@ -1653,7 +1657,7 @@ class Window:
         frame.after(1000, lambda: self.footer(frame))
 
     def menu_utama(self):
-        self.program_geometry = "500x300+525+200"
+        self.program_geometry = "525x300+525+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_utama_header_frame.grid(row=0, rowspan=2, column=0, columnspan=2)
@@ -1889,7 +1893,7 @@ class Window:
         self.footer(self.menu_tutorial_wa_footer_frame)
 
     def menu_proses_pelamar_kerja(self, pelamar):
-        self.program_geometry = "600x350+550+200"
+        self.program_geometry = "600x350+450+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_proses_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -1956,7 +1960,7 @@ class Window:
         self.menu_akhir_pelamar_kerja(LabelFrame(self.root, bd=0, highlightthickness=0), pelamar.pilihan_pemberitahuan)
 
     def menu_akhir_pelamar_kerja(self, frame, pilihan_pemberitahuan):
-        self.program_geometry = "650x325+475+200"
+        self.program_geometry = "650x325+400+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_akhir_pelamar_kerja_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
@@ -2006,7 +2010,7 @@ class Window:
             self.menu_login_admin("false")
 
     def menu_login_admin(self, check):
-        self.program_geometry = "500x310+525+200"
+        self.program_geometry = "525x310+525+200"
         self.root.geometry(self.program_geometry)
 
         self.menu_login_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=2)
@@ -2227,8 +2231,8 @@ class Window:
         self.footer(self.menu_list_kerja_admin_footer_frame)
 
     def menu_list_pelamar_admin(self, frame):
-        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pelamar"))))
-        self.program_geometry = "850x" + y_geometry + "+350+200"
+        y_geometry = str(300 + (15 * len(self.__menu_pelamar.retrievedata("pelamar"))) + 125)
+        self.program_geometry = "850x" + y_geometry + "+350+25"
         self.root.geometry(self.program_geometry)
 
         self.menu_list_pelamar_admin_header_frame.grid(row=0, rowspan=2, column=0, columnspan=3, padx=(25, 0))
